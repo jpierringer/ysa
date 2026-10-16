@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Light the Ward</title>
+<meta name="theme-color" content="#14122b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Light the Ward">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2314122b'/%3E%3Ctext x='90' y='122' font-size='100' text-anchor='middle'%3E🕯️%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🕯️%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#14122b; --bg2:#1d1a3a; --card:#25214a; --card2:#2e2958; --line:#3a3470;
+  --ink:#f6f1e7; --mute:#b4acd6; --gold:#f5c35b; --gold2:#ffdf94;
+  --t1:#6fd3a0; --t2:#6fb8f2; --t3:#f5b85b; --t4:#f27a8a;
+  --common:#a9a3c9; --uncommon:#6fd3a0; --rare:#6fb8f2; --legendary:#f5c35b;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px}
+body{background:radial-gradient(120% 60% at 50% -10%,#3b2f6e 0%,var(--bg) 60%) fixed;min-height:100vh}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0;letter-spacing:-.01em}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%}
+textarea{resize:vertical;min-height:70px}
+.wrap{max-width:540px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+.muted{color:var(--mute)} .small{font-size:13px} .center{text-align:center}
+.row{display:flex;gap:10px;align-items:center} .between{justify-content:space-between} .wrapf{flex-wrap:wrap}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.btn{background:var(--gold);color:#2a1e00;font-weight:800;padding:13px 18px;border-radius:14px;width:100%;transition:transform .1s}
+.btn:active{transform:scale(.97)} .btn:disabled{opacity:.5}
+.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{width:auto;padding:8px 12px;font-size:14px;border-radius:10px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:13px;font-weight:700}
+.chip.on{background:var(--gold);color:#2a1e00;border-color:var(--gold)}
+.label{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:18px 2px 8px}
+.bar{height:12px;background:var(--bg2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.bar.big{height:20px}
+/* header */
+.hero{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.ava{width:56px;height:56px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:30px;border:2px solid var(--gold);flex:none}
+.ava.s{width:36px;height:36px;font-size:19px;border-width:1px}
+.lv{font-size:12px;font-weight:800;color:var(--gold)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px;font-family:Fraunces,serif}
+.stat span{font-size:12px;color:var(--mute)}
+.bell{position:relative;font-size:22px;padding:6px}
+.bell em{position:absolute;top:0;right:0;background:var(--t4);color:#fff;font-style:normal;font-size:11px;font-weight:800;border-radius:99px;padding:1px 6px}
+/* mission */
+.mission{background:linear-gradient(160deg,#3b2f6e,#25214a 70%);border:1px solid #5a4ca0;position:relative;overflow:hidden}
+.mission:after{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;background:radial-gradient(circle,rgba(245,195,91,.35),transparent 70%)}
+.mission h2{font-size:22px;margin:4px 0}
+.done-flag{background:var(--t1);color:#062;font-weight:800;padding:8px 12px;border-radius:12px;margin-top:10px;text-align:center}
+/* quests */
+.quest{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--tc);border-radius:16px;padding:12px;margin-bottom:9px;transition:transform .1s}
+.quest:active{transform:scale(.98)}
+.quest.cool{opacity:.45}
+.quest .ic{font-size:26px;width:40px;height:40px;display:grid;place-items:center;background:var(--bg2);border-radius:12px;flex:none}
+.quest .tt{font-weight:800;line-height:1.25}
+.quest .ds{font-size:13px;color:var(--mute);margin-top:2px;line-height:1.3}
+.quest .xp{margin-left:auto;text-align:right;flex:none;font-weight:800;color:var(--gold);font-size:14px}
+.quest .xp small{display:block;color:var(--mute);font-weight:700;font-size:11px}
+.t1{--tc:var(--t1)} .t2{--tc:var(--t2)} .t3{--tc:var(--t3)} .t4{--tc:var(--t4)}
+.bonus{display:inline-block;background:var(--gold);color:#2a1e00;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;margin-left:4px;vertical-align:2px}
+.tierhead{display:flex;align-items:center;gap:8px;margin:20px 2px 8px}
+.tierhead b{font-family:Fraunces,serif;font-size:18px;color:var(--tc)}
+/* feed */
+.post{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.post:last-child{border:0}
+.post .body{flex:1;min-width:0}
+.post .note{background:var(--bg2);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:14px;font-style:italic}
+.cheer{font-size:13px;font-weight:800;color:var(--mute);padding:4px 0}
+.cheer.done{color:var(--t4)}
+.boardrow{display:flex;align-items:center;gap:10px;padding:7px 0}
+.rank{width:22px;text-align:center;font-weight:800;color:var(--gold)}
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tcard{--rc:var(--common);aspect-ratio:5/7;border-radius:12px;background:linear-gradient(170deg,#332d63,#1d1a3a);border:2px solid var(--rc);padding:6px;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.tcard.r-uncommon{--rc:var(--uncommon)} .tcard.r-rare{--rc:var(--rare)} .tcard.r-legendary{--rc:var(--legendary);box-shadow:0 0 18px rgba(245,195,91,.45)}
+.tcard.r-legendary:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.18) 45%,transparent 60%);animation:shine 3s infinite}
+@keyframes shine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.tc-name{font-family:Fraunces,serif;font-weight:800;font-size:11px;line-height:1.1;min-height:24px}
+.tc-art{flex:1;display:grid;place-items:center;font-size:34px;background:rgba(0,0,0,.25);border-radius:8px;margin:4px 0}
+.tc-flavor{display:none;font-size:12px;font-style:italic;color:var(--mute)}
+.tc-stats{display:flex;justify-content:space-between;font-size:10px;font-weight:800}
+.tc-stats .l{color:var(--gold)} .tc-stats .h{color:var(--t4)}
+.tc-qty{position:absolute;top:4px;right:4px;background:var(--rc);color:#111;font-size:10px;font-weight:800;border-radius:99px;padding:0 5px;z-index:2}
+.tcard.locked{--rc:var(--line);filter:grayscale(1);opacity:.4}
+.tcard.big{width:min(240px,70vw);margin:0 auto;padding:12px}
+.tcard.big .tc-name{font-size:19px;min-height:0}
+.tcard.big .tc-art{font-size:84px;margin:10px 0}
+.tcard.big .tc-flavor{display:block;margin-bottom:8px}
+.tcard.big .tc-stats{font-size:15px}
+.rarity{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--rc)}
+.flip{perspective:900px}
+.flip .inner{transition:transform .9s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d;transform:rotateY(180deg)}
+.flip.go .inner{transform:rotateY(0)}
+.flip .back,.flip .front{backface-visibility:hidden}
+.flip .back{position:absolute;inset:0;transform:rotateY(180deg);display:grid;place-items:center;font-size:60px;border-radius:12px;background:repeating-linear-gradient(45deg,#3b2f6e 0 12px,#2e2958 12px 24px);border:2px solid var(--gold);width:min(240px,70vw);margin:0 auto}
+/* badges */
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.badge{text-align:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px 4px}
+.badge .e{font-size:26px} .badge .n{font-size:11px;font-weight:800;margin-top:4px;line-height:1.15}
+.badge.off{opacity:.3;filter:grayscale(1)}
+/* nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,18,43,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11px;font-weight:800;color:var(--mute)}
+nav button span{font-size:22px;filter:grayscale(.6);transition:transform .15s}
+nav button.on{color:var(--gold)} nav button.on span{filter:none;transform:translateY(-2px) scale(1.1)}
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:40;display:none}
+.sheet.open{display:block}
+.sheet .scrim{position:absolute;inset:0;background:rgba(5,4,15,.7);animation:fade .2s}
+.sheet .box{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--line);padding:18px 18px calc(24px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.9,.3,1)}
+.sheet .box .in{max-width:520px;margin:0 auto}
+.grab{width:44px;height:5px;background:var(--line);border-radius:9px;margin:0 auto 14px}
+@keyframes up{from{transform:translateY(100%)}} @keyframes fade{from{opacity:0}}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-weight:800;padding:11px 16px;border-radius:14px;z-index:60;max-width:90vw;text-align:center;animation:fade .2s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0}
+.sw{width:50px;height:30px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
+.sw.on{background:var(--t1)} .sw.on:after{left:23px}
+.avpick{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.avpick button{font-size:24px;padding:6px 0;border-radius:10px;background:var(--card)}
+.avpick button.on{background:var(--gold)}
+.confetti{position:fixed;top:-10px;z-index:70;pointer-events:none;font-size:20px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.xpbig{font-family:Fraunces,serif;font-size:42px;color:var(--gold);text-align:center;animation:pop .5s}
+@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.15)}}
+.empty{text-align:center;padding:24px 10px;color:var(--mute)}
+.splash{min-height:80vh;display:grid;place-items:center;text-align:center}
+.flame{font-size:64px;animation:flick 2s infinite alternate}
+@keyframes flick{to{transform:scale(1.06) rotate(2deg)}}
+a{color:var(--gold2)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app" class="wrap"><div class="splash"><div><div class="flame">🕯️</div><p class="muted">Lighting the lamps…</p></div></div></div>
+<nav id="nav" hidden><div class="in">
+  <button data-tab="home"><span>🏠</span>Home</button>
+  <button data-tab="quests"><span>🗺️</span>Quests</button>
+  <button data-tab="ward"><span>👥</span>Ward</button>
+  <button data-tab="cards"><span>🃏</span>Cards</button>
+  <button data-tab="me"><span>🙂</span>Me</button>
+</div></nav>
+<div id="sheet" class="sheet"><div class="scrim" onclick="closeSheet()"></div><div class="box"><div class="in"><div class="grab"></div><div id="sheetBody"></div></div></div></div>
+
+<script>
+/* ============ CONFIG — paste from Supabase → Settings → API ============ */
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+/* ====================================================================== */
+
+const configured = !SUPABASE_URL.includes('YOUR-PROJECT') && !SUPABASE_ANON_KEY.includes('YOUR-ANON');
+const sb = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: 'ysa' } }) : null;
+
+const TIERS = {
+  1: { name: 'Quiet', emoji: '🌱', desc: 'Just you and heaven — no one else needed' },
+  2: { name: 'Reach Out', emoji: '💬', desc: 'A text, a hello, a kind word' },
+  3: { name: 'Together', emoji: '🤝', desc: 'One-on-one or a small group' },
+  4: { name: 'Gather', emoji: '🔥', desc: 'Bigger groups & bringing others in' }
+};
+const BATTERY = { low: { label: '🪫 Low', tiers: [1, 2] }, mid: { label: '🔋 Medium', tiers: [1, 2, 3] }, full: { label: '⚡ Full', tiers: [1, 2, 3, 4] } };
+const RAR = { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary' };
+const AVATARS = ['🙂','😎','🤠','🦊','🐻','🦉','🐢','🦁','🐼','🐙','🌻','🌵','🍀','⭐','🌙','☀️','🔥','🌊','🎸','🎮','📚','🏀','⚽','🎨'];
+const TITLES = ['Seeker','Friend','Neighbor','Helper','Lamplighter','Shepherd','Peacemaker','Pillar','Beacon','Disciple'];
+const ENCOURAGE = ["Glad you're in our ward 💛", 'Thinking of you this week 🙏', "You've got this! 💪", 'Your quest inspired me ✨', 'Save me a seat Sunday? 🪑'];
+
+const S = { tab: 'home', uid: null, user: null, me: null, players: [], quests: [], comps: [], cards: [], myCards: [], inbox: [], home: null, feed: null, cheered: new Set(), battery: lsGet('battery') || 'mid' };
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function lsGet(k) { try { return localStorage.getItem('ltw_' + k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem('ltw_' + k, v); } catch (e) {} }
+function toast(msg, ms = 2600) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+function errMsg(e) { return (e && (e.message || e.error_description)) || 'Something went wrong'; }
+function tz() { return (S.home && S.home.timezone) || 'America/Chicago'; }
+function localDate(ts) { return new Date(ts).toLocaleDateString('en-CA', { timeZone: tz() }); }
+function dnum(d) { const [y, m, dd] = d.split('-').map(Number); return Date.UTC(y, m - 1, dd) / 864e5; }
+function daysBetween(a, b) { return dnum(b) - dnum(a); }
+function weekStart(d) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() - x.getUTCDay()); return x.toISOString().slice(0, 10); }
+function shiftWeek(d, n) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + 7 * n); return x.toISOString().slice(0, 10); }
+function ago(ts) { const s = (Date.now() - new Date(ts)) / 1000; if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + 'm'; if (s < 86400) return Math.floor(s / 3600) + 'h'; return Math.floor(s / 86400) + 'd'; }
+function levelInfo(xp) { const lv = Math.floor(Math.sqrt(xp / 50)) + 1; const cur = 50 * (lv - 1) ** 2, next = 50 * lv ** 2; return { lv, title: TITLES[Math.min(lv - 1, TITLES.length - 1)], pct: Math.round((xp - cur) / (next - cur) * 100), toNext: next - xp }; }
+function player(id) { return S.players.find(p => p.id === id); }
+function confetti(n = 28) { const e = ['✨', '⭐', '💛', '🎉', '🕯️']; for (let i = 0; i < n; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.textContent = e[i % e.length]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDuration = 1.8 + Math.random() * 1.8 + 's'; c.style.animationDelay = Math.random() * .4 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 4200); } }
+function openSheet(html) { $('#sheetBody').innerHTML = html; $('#sheet').classList.add('open'); }
+function closeSheet() { $('#sheet').classList.remove('open'); }
+function isUuid(s) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || ''); }
+
+/* ---------- boot ---------- */
+(function captureRef() { const r = new URLSearchParams(location.search).get('ref'); if (isUuid(r)) lsSet('ref', r); })();
+
+async function boot() {
+  if (!configured) {
+    $('#app').innerHTML = `<div class="splash"><div class="panel"><div class="flame">🛠️</div><h2>Almost ready</h2><p class="muted">Open <b>index.html</b> and paste your Supabase URL and anon key at the top of the script.</p></div></div>`;
+    return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return renderJoin();
+  S.uid = session.user.id; S.user = session.user;
+  const { data: me } = await sb.from('players').select('*').eq('id', S.uid).maybeSingle();
+  if (!me) return renderJoin();
+  S.me = me;
+  await loadAll();
+  $('#nav').hidden = false;
+  render();
+}
+
+async function loadAll() {
+  const uid = S.uid;
+  const [home, quests, comps, cards, myCards, players, inbox] = await Promise.all([
+    sb.rpc('ward_home'),
+    sb.from('quests').select('*').order('tier').order('xp'),
+    sb.from('completions').select('id,quest_id,quest_title,tier,xp,partner_id,card_id,created_at').eq('player_id', uid).order('created_at', { ascending: false }).limit(1000),
+    sb.from('cards').select('*').order('id'),
+    sb.from('player_cards').select('*').eq('player_id', uid),
+    sb.from('players').select('id,display_name,avatar,is_leader,xp,hide_from_board,created_at').order('display_name'),
+    sb.from('kudos').select('*').eq('to_id', uid).order('created_at', { ascending: false }).limit(50)
+  ]);
+  for (const r of [home, quests, comps, cards, myCards, players, inbox]) if (r.error) { toast(errMsg(r.error)); }
+  S.home = home.data; S.quests = quests.data || []; S.comps = comps.data || []; S.cards = cards.data || [];
+  S.myCards = myCards.data || []; S.players = players.data || []; S.inbox = inbox.data || [];
+  S.me = S.players.find(p => p.id === uid) || S.me;
+}
+
+/* ---------- join ---------- */
+function renderJoin() {
+  $('#nav').hidden = true;
+  let av = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+  const hasRef = !!lsGet('ref');
+  $('#app').innerHTML = `
+  <div style="padding-top:6vh" class="center"><div class="flame">🕯️</div>
+    <h1 style="font-size:34px">Light the Ward</h1>
+    <p class="muted" style="margin:6px 0 22px">Weekly missions, side quests & collectible cards for the Sheboygan Ward YSAs. Quiet or outgoing — there's a quest for you.</p></div>
+  ${hasRef ? `<div class="panel center small">🐑 A friend invited you — welcome!</div>` : ''}
+  <div class="panel">
+    <div class="label" style="margin-top:0">Your name</div>
+    <input id="jName" maxlength="40" placeholder="First name is perfect" autocomplete="given-name">
+    <div class="label">Pick an avatar</div>
+    <div class="avpick" id="jAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}">${a}</button>`).join('')}</div>
+    <div class="label">Ward code</div>
+    <input id="jCode" placeholder="Ask a YSA leader" autocapitalize="characters">
+    <div style="height:14px"></div>
+    <button class="btn" id="jGo">Join the team</button>
+  </div>
+  <p class="center small muted">Played before on another phone? <a href="#" id="jEmail">Sign in with email</a></p>`;
+  $('#jAv').onclick = e => { const b = e.target.closest('button'); if (!b) return; av = b.dataset.a; [...$('#jAv').children].forEach(x => x.classList.toggle('on', x === b)); };
+  $('#jEmail').onclick = e => { e.preventDefault(); emailSignInSheet(); };
+  $('#jGo').onclick = async () => {
+    const name = $('#jName').value.trim(), code = $('#jCode').value.trim();
+    if (!name) return toast('Add your name');
+    if (!code) return toast('Add the ward code');
+    const btn = $('#jGo'); btn.disabled = true; btn.textContent = 'Joining…';
+    try {
+      let { data: { session } } = await sb.auth.getSession();
+      if (!session) { const r = await sb.auth.signInAnonymously(); if (r.error) throw r.error; session = r.data.session; }
+      const ref = lsGet('ref');
+      const { error } = await sb.rpc('join_ward', { p_code: code, p_name: name, p_avatar: av, p_ref: isUuid(ref) ? ref : null });
+      if (error) throw error;
+      lsSet('ref', '');
+      confetti();
+      await boot();
+      setTimeout(() => toast('Welcome to the team, ' + name + '! 🕯️'), 300);
+    } catch (e) { toast(errMsg(e)); btn.disabled = false; btn.textContent = 'Join the team'; }
+  };
+}
+
+function emailSignInSheet() {
+  openSheet(`<h2>Sign in with email</h2><p class="muted small">Only works if you saved your progress with an email before. We'll send a sign-in link.</p>
+  <input id="eAddr" type="email" placeholder="you@email.com"><div style="height:12px"></div>
+  <button class="btn" id="eGo">Send link</button>`);
+  $('#eGo').onclick = async () => {
+    const email = $('#eAddr').value.trim(); if (!email) return;
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
+    if (error) return toast(errMsg(error));
+    closeSheet(); toast('Check your email for the link 📬', 4000);
+  };
+}
+
+/* ---------- derived ---------- */
+function streak() {
+  const weeks = new Set(S.comps.map(c => weekStart(localDate(c.created_at))));
+  let w = weekStart(S.home.today); if (!weeks.has(w)) w = shiftWeek(w, -1);
+  let n = 0; while (weeks.has(w)) { n++; w = shiftWeek(w, -1); } return n;
+}
+function questStatus(q) {
+  if (!q.cooldown_days) return { ok: true };
+  const last = S.comps.find(c => c.quest_id === q.id); if (!last) return { ok: true };
+  const left = q.cooldown_days - daysBetween(localDate(last.created_at), S.home.today);
+  return left > 0 ? { ok: false, left } : { ok: true };
+}
+function isSide(q) { return (S.home.sides || []).includes(q.id); }
+function weekXP() { const ws = weekStart(S.home.today); return S.comps.filter(c => weekStart(localDate(c.created_at)) === ws).reduce((a, c) => a + c.xp, 0); }
+function unseen() { return S.inbox.filter(k => !k.seen).length; }
+
+function badges() {
+  const c = S.comps, byTier = t => c.filter(x => x.tier === t).length;
+  const owned = new Set(S.myCards.map(x => x.card_id));
+  const legend = S.cards.some(k => k.rarity === 'legendary' && owned.has(k.id));
+  const has = s => c.some(x => (x.quest_title || '').toLowerCase().includes(s));
+  return [
+    { e: '👣', n: 'First Step', on: c.length >= 1, how: 'Complete any quest' },
+    { e: '🌱', n: 'Quiet Strength', on: byTier(1) >= 10, how: '10 Quiet quests' },
+    { e: '💬', n: 'Reacher', on: byTier(2) >= 10, how: '10 Reach Out quests' },
+    { e: '🤝', n: 'Companion', on: byTier(3) >= 5, how: '5 Together quests' },
+    { e: '🔥', n: 'Gatherer', on: byTier(4) >= 5, how: '5 Gather quests' },
+    { e: '🍽️', n: 'Table Guest', on: has('family for a meal'), how: 'Join a ward family for a meal' },
+    { e: '🛠️', n: 'JustServe', on: has('justserve'), how: 'Do a JustServe project' },
+    { e: '🐑', n: 'Shepherd', on: has('recruited'), how: 'Invite someone who joins' },
+    { e: '👯', n: 'Duo', on: c.filter(x => x.partner_id).length >= 5, how: '5 quests with a teammate' },
+    { e: '📅', n: 'Steady', on: streak() >= 4, how: '4-week streak' },
+    { e: '🃏', n: 'Collector', on: owned.size >= 12, how: '12 different cards' },
+    { e: '👑', n: 'Legend', on: legend, how: 'Draw a legendary card' }
+  ];
+}
+
+/* ---------- render ---------- */
+function render() {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
+  ({ home: renderHome, quests: renderQuests, ward: renderWard, cards: renderCards, me: renderMe })[S.tab]();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
+
+function questRow(q) {
+  const st = questStatus(q), side = isSide(q);
+  const xp = q.xp + (side ? Math.floor(q.xp / 2) : 0);
+  return `<button class="quest t${q.tier} ${st.ok ? '' : 'cool'}" data-q="${q.id}">
+    <div class="ic">${esc(q.icon)}</div>
+    <div style="min-width:0"><div class="tt">${esc(q.title)}${side ? '<span class="bonus">SIDE +50%</span>' : ''}</div>
+      <div class="ds">${st.ok ? esc(q.description) : `✓ Done — back in ${st.left} day${st.left > 1 ? 's' : ''}`}</div></div>
+    <div class="xp">+${xp}<small>${TIERS[q.tier].emoji} ${TIERS[q.tier].name}</small></div></button>`;
+}
+function bindQuests(root) { root.querySelectorAll('[data-q]').forEach(b => b.onclick = () => openQuest(b.dataset.q)); }
+
+function renderHome() {
+  const me = S.me, L = levelInfo(me.xp), h = S.home, m = h.mission;
+  const pct = Math.min(100, Math.round(h.progress / m.goal * 100));
+  const sides = (h.sides || []).map(id => S.quests.find(q => q.id === id)).filter(Boolean);
+  const others = S.players.filter(p => p.id !== S.uid);
+  const pick = others.sort(() => Math.random() - .5).slice(0, 3);
+  const n = unseen();
+  $('#app').innerHTML = `
+  <div class="hero">
+    <div class="ava">${esc(me.avatar)}</div>
+    <div style="flex:1;min-width:0">
+      <div class="lv">LEVEL ${L.lv} · ${L.title.toUpperCase()}</div>
+      <h2 style="font-size:22px">${esc(me.display_name)}</h2>
+      <div class="bar" style="margin-top:6px"><i style="width:${L.pct}%"></i></div>
+      <div class="small muted" style="margin-top:3px">${L.toNext} XP to level ${L.lv + 1}</div>
+    </div>
+    <button class="bell" id="bell">🔔${n ? `<em>${n}</em>` : ''}</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>${streak()}🔥</b><span>week streak</span></div>
+    <div class="stat"><b>${weekXP()}</b><span>XP this week</span></div>
+    <div class="stat"><b>${new Set(S.myCards.map(c => c.card_id)).size}/${S.cards.length}</b><span>cards</span></div>
+  </div>
+  <div class="panel mission">
+    <div class="small" style="color:var(--gold);font-weight:800">⚔️ THIS WEEK'S WARD MISSION</div>
+    <h2>${esc(m.title)}</h2>
+    <p class="muted small" style="margin:0 0 12px">${esc(m.description)}</p>
+    <div class="bar big"><i style="width:${pct}%"></i></div>
+    <div class="row between small" style="margin-top:6px"><b>${h.progress} / ${m.goal} quests</b><span class="muted">${h.heroes} teammate${h.heroes === 1 ? '' : 's'} helping</span></div>
+    ${m.reward ? `<div class="small" style="margin-top:8px">🎁 Reward: <b>${esc(m.reward)}</b></div>` : ''}
+    ${h.progress >= m.goal ? `<div class="done-flag">🎉 Mission complete! Keep going for bonus glory.</div>` : ''}
+  </div>
+  <div class="label">✨ Today's side quests · +50% XP</div>
+  <div id="sides">${sides.map(questRow).join('') || '<div class="empty">No side quests today</div>'}</div>
+  ${pick.length ? `<div class="label">💛 Send some love</div>
+  <div class="panel"><div class="small muted" style="margin-bottom:10px">A quick encouragement takes five seconds and can make someone's week.</div>
+  <div class="row wrapf">${pick.map(p => `<button class="chip" data-enc="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</button>`).join('')}</div></div>` : ''}
+  `;
+  bindQuests($('#sides'));
+  $('#bell').onclick = openInbox;
+  document.querySelectorAll('[data-enc]').forEach(b => b.onclick = () => encourage(b.dataset.enc));
+}
+
+function renderQuests() {
+  const allowed = BATTERY[S.battery].tiers;
+  $('#app').innerHTML = `
+  <h1 style="font-size:28px;margin-bottom:4px">Quests</h1>
+  <p class="muted small" style="margin:0 0 12px">Every quest — even the quiet ones — fills the ward mission bar.</p>
+  <div class="panel" style="padding:12px">
+    <div class="small" style="font-weight:800;margin-bottom:8px">How's your social battery today?</div>
+    <div class="row wrapf" id="batt">${Object.entries(BATTERY).map(([k, v]) => `<button class="chip ${k === S.battery ? 'on' : ''}" data-b="${k}">${v.label}</button>`).join('')}</div>
+  </div>
+  <div id="qlist">${[1, 2, 3, 4].filter(t => allowed.includes(t)).map(t => {
+    const qs = S.quests.filter(q => q.is_active && q.tier === t).sort((a, b) => questStatus(b).ok - questStatus(a).ok);
+    if (!qs.length) return '';
+    return `<div class="tierhead t${t}"><span style="font-size:22px">${TIERS[t].emoji}</span><div><b>${TIERS[t].name}</b><div class="small muted">${TIERS[t].desc}</div></div></div>${qs.map(questRow).join('')}`;
+  }).join('')}</div>
+  ${S.battery !== 'full' ? `<p class="center small muted">Feeling braver? Switch to ⚡ Full to see Gather quests.</p>` : ''}`;
+  $('#batt').onclick = e => { const b = e.target.closest('[data-b]'); if (!b) return; S.battery = b.dataset.b; lsSet('battery', S.battery); renderQuests(); };
+  bindQuests($('#qlist'));
+}
+
+function openQuest(id) {
+  const q = S.quests.find(x => x.id === id); if (!q) return;
+  const st = questStatus(q), side = isSide(q), xp = q.xp + (side ? Math.floor(q.xp / 2) : 0);
+  const mates = S.players.filter(p => p.id !== S.uid);
+  openSheet(`
+    <div class="row" style="gap:12px"><div class="quest t${q.tier}" style="padding:0;border:0;background:none;margin:0;width:auto"><div class="ic" style="width:56px;height:56px;font-size:34px">${esc(q.icon)}</div></div>
+      <div><div class="small" style="font-weight:800;color:var(--t${q.tier})">${TIERS[q.tier].emoji} ${TIERS[q.tier].name.toUpperCase()}${side ? ' · SIDE QUEST' : ''}</div><h2 style="font-size:21px">${esc(q.title)}</h2></div></div>
+    <p class="muted">${esc(q.description)}</p>
+    <div class="row small" style="gap:14px;margin-bottom:6px"><b style="color:var(--gold)">+${xp} XP</b><span class="muted">🃏 Card draw</span><span class="muted">${q.cooldown_days === 1 ? 'Daily' : q.cooldown_days === 7 ? 'Weekly' : q.cooldown_days ? 'Every ' + q.cooldown_days + ' days' : 'Repeatable'}</span></div>
+    ${st.ok ? `
+    <div class="label">A thought to share (optional)</div>
+    <textarea id="qNote" maxlength="280" placeholder="${q.tier === 1 ? 'What did you feel or notice?' : 'How did it go?'}"></textarea>
+    ${q.tier >= 2 && mates.length ? `<div class="label">Did it with a teammate? They get half XP too</div>
+    <select id="qPartner"><option value="">— Just me —</option>${mates.map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</option>`).join('')}</select>` : ''}
+    <div class="toggle"><div><b>Share on the Ward Wall</b><div class="small muted">Off = still counts for the mission, just private</div></div><button class="sw ${q.tier === 1 ? '' : 'on'}" id="qPub"></button></div>
+    <button class="btn" id="qGo">I did it! ✨</button>` : `<div class="panel center">✓ You've done this one. It comes back in <b>${st.left} day${st.left > 1 ? 's' : ''}</b>.</div>`}`);
+  if (!st.ok) return;
+  $('#qPub').onclick = e => e.currentTarget.classList.toggle('on');
+  $('#qGo').onclick = async () => {
+    const btn = $('#qGo'); btn.disabled = true; btn.textContent = 'Recording…';
+    const prevLv = levelInfo(S.me.xp).lv, prevProg = S.home.progress, goal = S.home.mission.goal;
+    const { data, error } = await sb.rpc('complete_quest', {
+      p_quest: q.id, p_note: $('#qNote').value, p_public: $('#qPub').classList.contains('on'),
+      p_partner: ($('#qPartner') && $('#qPartner').value) || null
+    });
+    if (error) { btn.disabled = false; btn.textContent = 'I did it! ✨'; return toast(errMsg(error)); }
+    revealCard(data);
+    await loadAll();
+    const L = levelInfo(S.me.xp);
+    setTimeout(() => {
+      if (L.lv > prevLv) { confetti(40); toast(`⬆️ Level ${L.lv} — ${L.title}!`, 3500); }
+      if (prevProg < goal && S.home.progress >= goal) { confetti(60); toast('🎉 WARD MISSION COMPLETE! 🎉', 4000); }
+    }, 1400);
+    S.feed = null; render();
+  };
+}
+
+function cardHTML(c, extra = '', qty = 0) {
+  return `<div class="tcard r-${c.rarity} ${extra}">${qty > 1 ? `<span class="tc-qty">×${qty}</span>` : ''}
+    <div class="tc-name">${esc(c.name)}</div><div class="tc-art">${esc(c.emoji)}</div>
+    <div class="tc-flavor">${esc(c.flavor)}</div>
+    <div class="tc-stats"><span class="l">☀ ${c.light}</span><span class="h">♥ ${c.heart}</span></div></div>`;
+}
+
+function revealCard(r) {
+  const c = r.card;
+  openSheet(`
+    <div class="xpbig">+${r.xp} XP</div>
+    <p class="center small muted" style="margin:0 0 16px">${r.bonus ? '✨ Side quest bonus included! ' : ''}${r.partner_xp ? `Your teammate got +${r.partner_xp} XP 🤝` : ''}</p>
+    <div class="flip" id="flip" style="position:relative"><div class="inner">
+      <div class="front">${cardHTML(c, 'big')}</div><div class="back">🕯️</div></div></div>
+    <p class="center" style="margin-top:14px"><span class="rarity tcard r-${c.rarity}" style="all:unset;font-weight:800;color:var(--${c.rarity});letter-spacing:.1em;font-size:13px">${RAR[c.rarity].toUpperCase()}</span>
+    ${r.new_card ? ' · <b style="color:var(--t1)">NEW CARD!</b>' : ' · duplicate'}</p>
+    <button class="btn" onclick="closeSheet()">Keep going</button>`);
+  setTimeout(() => { $('#flip').classList.add('go'); if (c.rarity === 'legendary' || c.rarity === 'rare') confetti(c.rarity === 'legendary' ? 50 : 20); }, 350);
+}
+
+async function renderWard() {
+  const h = S.home;
+  $('#app').innerHTML = `
+  <h1 style="font-size:28px;margin-bottom:12px">${esc(h.ward_name)}</h1>
+  <div class="label" style="margin-top:0">🌟 Lights of the week</div>
+  <div class="panel">${(h.board || []).length ? h.board.map((b, i) => `<div class="boardrow"><span class="rank">${i + 1}</span><div class="ava s">${esc(b.avatar)}</div><b style="flex:1">${esc(b.display_name)}</b><span class="small" style="color:var(--gold);font-weight:800">${b.wxp} XP</span></div>`).join('') : '<div class="empty">No one yet this week — be the first light!</div>'}</div>
+  <div class="label">📣 Ward Wall</div>
+  <div class="panel" id="feed"><div class="empty">Loading…</div></div>
+  <div class="label">👥 Team (${S.players.length})</div>
+  <div class="panel">${S.players.map(p => `<div class="boardrow"><div class="ava s">${esc(p.avatar)}</div><div style="flex:1"><b>${esc(p.display_name)}</b>${p.is_leader ? ' <span class="small" style="color:var(--gold)">★ leader</span>' : ''}<div class="small muted">Level ${levelInfo(p.xp).lv} · ${levelInfo(p.xp).title}</div></div>${p.id !== S.uid ? `<button class="btn ghost sm" data-enc="${p.id}">💛</button>` : ''}</div>`).join('')}</div>`;
+  document.querySelectorAll('[data-enc]').forEach(b => b.onclick = () => encourage(b.dataset.enc));
+  if (!S.feed) {
+    const { data, error } = await sb.from('completions').select('id,player_id,partner_id,quest_title,tier,note,xp,created_at,card_id').eq('is_public', true).order('created_at', { ascending: false }).limit(40);
+    if (error) { $('#feed').innerHTML = `<div class="empty">${esc(errMsg(error))}</div>`; return; }
+    S.feed = data || [];
+  }
+  if (S.tab !== 'ward') return;
+  $('#feed').innerHTML = S.feed.length ? S.feed.map(c => {
+    const p = player(c.player_id) || { display_name: 'Someone', avatar: '🙂' }, pt = c.partner_id && player(c.partner_id);
+    const card = S.cards.find(k => k.id === c.card_id);
+    const mine = c.player_id === S.uid, done = S.cheered.has(c.id);
+    return `<div class="post"><div class="ava s">${esc(p.avatar)}</div><div class="body">
+      <div><b>${esc(p.display_name)}</b>${pt ? ` & <b>${esc(pt.display_name)}</b>` : ''} <span class="muted">completed</span> <b style="color:var(--t${c.tier})">${esc(c.quest_title)}</b></div>
+      ${c.note ? `<div class="note">“${esc(c.note)}”</div>` : ''}
+      <div class="row between small muted" style="margin-top:4px"><span>${ago(c.created_at)} · +${c.xp} XP${card ? ` · drew ${esc(card.emoji)}` : ''}</span>
+      ${mine ? '' : `<button class="cheer ${done ? 'done' : ''}" data-cheer="${c.id}" data-to="${c.player_id}">${done ? '❤️ Cheered' : '🤍 Cheer'}</button>`}</div></div></div>`;
+  }).join('') : '<div class="empty">The wall is empty. Complete a quest and share it!</div>';
+  document.querySelectorAll('[data-cheer]').forEach(b => b.onclick = async () => {
+    if (S.cheered.has(b.dataset.cheer)) return;
+    S.cheered.add(b.dataset.cheer); b.classList.add('done'); b.textContent = '❤️ Cheered';
+    const { error } = await sb.from('kudos').insert({ from_id: S.uid, to_id: b.dataset.to, completion_id: b.dataset.cheer, message: 'cheered your quest ❤️' });
+    if (error) toast(errMsg(error));
+  });
+}
+
+function encourage(id) {
+  const p = player(id); if (!p) return;
+  openSheet(`<div class="row"><div class="ava">${esc(p.avatar)}</div><h2>Encourage ${esc(p.display_name)}</h2></div>
+    <div class="label">Pick one</div><div class="row wrapf" id="encList">${ENCOURAGE.map((m, i) => `<button class="chip" data-m="${i}">${esc(m)}</button>`).join('')}</div>
+    <div class="label">…or write your own</div><input id="encTxt" maxlength="200" placeholder="Say something kind">
+    <div style="height:12px"></div><button class="btn" id="encGo">Send 💛</button>`);
+  $('#encList').onclick = e => { const b = e.target.closest('[data-m]'); if (b) $('#encTxt').value = ENCOURAGE[b.dataset.m]; };
+  $('#encGo').onclick = async () => {
+    const msg = $('#encTxt').value.trim(); if (!msg) return toast('Pick or write a message');
+    const { error } = await sb.from('kudos').insert({ from_id: S.uid, to_id: id, message: msg });
+    if (error) return toast(errMsg(error));
+    closeSheet(); toast('Sent to ' + p.display_name + ' 💛');
+  };
+}
+
+async function openInbox() {
+  openSheet(`<h2 style="margin-bottom:10px">💌 Your encouragement</h2>${S.inbox.length ? S.inbox.map(k => {
+    const f = player(k.from_id) || { display_name: 'A teammate', avatar: '🙂' };
+    return `<div class="post"><div class="ava s">${esc(f.avatar)}</div><div class="body"><b>${esc(f.display_name)}</b> ${esc(k.message)}<div class="small muted">${ago(k.created_at)}${k.seen ? '' : ' · <b style="color:var(--t4)">new</b>'}</div></div></div>`;
+  }).join('') : '<div class="empty">Nothing yet — try sending some love first 💛</div>'}`);
+  const ids = S.inbox.filter(k => !k.seen).map(k => k.id);
+  if (ids.length) { await sb.from('kudos').update({ seen: true }).in('id', ids); S.inbox.forEach(k => k.seen = true); if (S.tab === 'home') renderHome(); }
+}
+
+function renderCards() {
+  const own = new Map(S.myCards.map(c => [c.card_id, c.qty]));
+  const order = ['legendary', 'rare', 'uncommon', 'common'];
+  $('#app').innerHTML = `
+  <h1 style="font-size:28px;margin-bottom:4px">Card Collection</h1>
+  <p class="muted small" style="margin:0 0 10px">Every quest draws a card. Bigger social stretches draw rarer cards.</p>
+  <div class="panel"><div class="row between small"><b>${own.size} of ${S.cards.length} collected</b><span class="muted">${S.myCards.reduce((a, c) => a + c.qty, 0)} total draws</span></div>
+  <div class="bar" style="margin-top:8px"><i style="width:${Math.round(own.size / Math.max(1, S.cards.length) * 100)}%"></i></div></div>
+  ${order.map(r => `<div class="label" style="color:var(--${r})">${RAR[r]}</div><div class="grid">${S.cards.filter(c => c.rarity === r).map(c =>
+    own.has(c.id) ? `<button data-card="${c.id}" style="padding:0">${cardHTML(c, '', own.get(c.id))}</button>`
+      : `<div class="tcard locked"><div class="tc-name">???</div><div class="tc-art">❔</div><div class="tc-stats"><span>☀ ?</span><span>♥ ?</span></div></div>`).join('')}</div>`).join('')}`;
+  document.querySelectorAll('[data-card]').forEach(b => b.onclick = () => {
+    const c = S.cards.find(k => k.id == b.dataset.card);
+    openSheet(`${cardHTML(c, 'big')}<p class="center" style="font-weight:800;color:var(--${c.rarity})">${RAR[c.rarity].toUpperCase()} · ×${own.get(c.id)}</p><button class="btn ghost" onclick="closeSheet()">Close</button>`);
+  });
+}
+
+function renderMe() {
+  const me = S.me, L = levelInfo(me.xp), bs = badges();
+  const invite = location.origin + location.pathname + '?ref=' + S.uid;
+  const anon = S.user && S.user.is_anonymous;
+  $('#app').innerHTML = `
+  <div class="hero"><div class="ava">${esc(me.avatar)}</div><div><h2>${esc(me.display_name)}</h2><div class="lv">LEVEL ${L.lv} · ${L.title.toUpperCase()} · ${me.xp} XP</div></div></div>
+  <div class="label">🏅 Badges (${bs.filter(b => b.on).length}/${bs.length})</div>
+  <div class="badges">${bs.map(b => `<div class="badge ${b.on ? '' : 'off'}" title="${esc(b.how)}"><div class="e">${b.e}</div><div class="n">${b.n}</div></div>`).join('')}</div>
+  <p class="small muted center">Tap-and-hold a faded badge to see how to earn it.</p>
+
+  <div class="label">🐑 Recruit a teammate · +60 XP & a legendary card</div>
+  <div class="panel"><div class="small muted" style="margin-bottom:10px">Share your personal link. When they join, you both win.</div>
+  <button class="btn" id="share">Share invite link</button></div>
+
+  <div class="label">Profile</div>
+  <div class="panel">
+    <input id="pName" maxlength="40" value="${esc(me.display_name)}">
+    <div style="height:10px"></div>
+    <div class="avpick" id="pAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === me.avatar ? 'on' : ''}">${a}</button>`).join('')}</div>
+    <div class="toggle"><div><b>Hide me from "Lights of the week"</b><div class="small muted">Your quests still count for the mission</div></div><button class="sw ${me.hide_from_board ? 'on' : ''}" id="pHide"></button></div>
+    <button class="btn ghost" id="pSave">Save profile</button>
+  </div>
+
+  ${anon ? `<div class="label">🔒 Protect your progress</div>
+  <div class="panel"><div class="small muted" style="margin-bottom:10px">Right now your progress lives on this phone only. Add an email so you can sign in anywhere.</div>
+  <input id="pEmail" type="email" placeholder="you@email.com"><div style="height:10px"></div><button class="btn ghost" id="pEmailGo">Save with email</button></div>`
+      : `<p class="small muted center">Signed in as ${esc(S.user && S.user.email)}</p>`}
+
+  ${me.is_leader ? leaderPanel() : `<div class="label">Leaders</div><div class="panel"><div class="row"><input id="lCode" placeholder="Leader code"><button class="btn ghost sm" id="lGo">Unlock</button></div></div>`}
+  `;
+  let av = me.avatar;
+  $('#pAv').onclick = e => { const b = e.target.closest('button'); if (!b) return; av = b.dataset.a; [...$('#pAv').children].forEach(x => x.classList.toggle('on', x === b)); };
+  $('#pHide').onclick = e => e.currentTarget.classList.toggle('on');
+  $('#pSave').onclick = async () => {
+    const { error } = await sb.from('players').update({ display_name: $('#pName').value.trim() || me.display_name, avatar: av, hide_from_board: $('#pHide').classList.contains('on') }).eq('id', S.uid);
+    if (error) return toast(errMsg(error));
+    await loadAll(); toast('Saved ✓'); renderMe();
+  };
+  $('#share').onclick = async () => {
+    const text = `Join me on Light the Ward — our YSA quest game! Ward code: ask me 😊`;
+    if (navigator.share) { try { await navigator.share({ title: 'Light the Ward', text, url: invite }); } catch (e) {} }
+    else { try { await navigator.clipboard.writeText(invite); toast('Invite link copied 📋'); } catch (e) { prompt('Copy your invite link:', invite); } }
+  };
+  if (anon) $('#pEmailGo').onclick = async () => {
+    const email = $('#pEmail').value.trim(); if (!email) return;
+    const { error } = await sb.auth.updateUser({ email }, { emailRedirectTo: location.origin + location.pathname });
+    if (error) return toast(errMsg(error));
+    toast('Check your email to confirm 📬', 4000);
+  };
+  if (!me.is_leader) $('#lGo').onclick = async () => {
+    const { error } = await sb.rpc('claim_leader', { p_code: $('#lCode').value });
+    if (error) return toast(errMsg(error));
+    await loadAll(); toast('Leader tools unlocked ★'); renderMe();
+  };
+  else bindLeader();
+}
+
+/* ---------- leader tools ---------- */
+function leaderPanel() {
+  const m = S.home.mission;
+  return `<div class="label" style="color:var(--gold)">★ Leader tools</div>
+  <div class="panel"><h3 style="margin-bottom:8px">This week's mission</h3>
+    <input id="mTitle" value="${esc(m.title)}" placeholder="Mission title"><div style="height:8px"></div>
+    <textarea id="mDesc" placeholder="What are we doing together?">${esc(m.description)}</textarea><div style="height:8px"></div>
+    <div class="row"><input id="mGoal" type="number" min="1" value="${m.goal}" style="width:110px"><input id="mReward" value="${esc(m.reward)}" placeholder="Reward (e.g. pizza night)"></div>
+    <div style="height:10px"></div><button class="btn" id="mSave">Update mission</button></div>
+  <div class="panel"><h3 style="margin-bottom:8px">Add a quest</h3>
+    <div class="row"><input id="nIcon" value="⭐" style="width:64px;text-align:center"><input id="nTitle" placeholder="Quest title"></div><div style="height:8px"></div>
+    <textarea id="nDesc" placeholder="Description"></textarea><div style="height:8px"></div>
+    <div class="row"><select id="nTier">${[1, 2, 3, 4].map(t => `<option value="${t}">${TIERS[t].emoji} ${TIERS[t].name}</option>`).join('')}</select>
+    <input id="nXp" type="number" min="5" value="25" style="width:90px"></div><div style="height:8px"></div>
+    <select id="nCool"><option value="1">Daily</option><option value="3">Every 3 days</option><option value="7" selected>Weekly</option><option value="14">Every 2 weeks</option><option value="0">Unlimited</option></select>
+    <div style="height:10px"></div><button class="btn" id="nGo">Add quest</button></div>
+  <div class="panel"><h3 style="margin-bottom:8px">Quest list</h3>${S.quests.map(q => `<div class="toggle" style="padding:6px 0"><span class="small">${esc(q.icon)} ${esc(q.title)} <span class="muted">· ${q.xp}xp</span></span><button class="sw ${q.is_active ? 'on' : ''}" data-act="${q.id}"></button></div>`).join('')}</div>
+  <div class="panel"><h3 style="margin-bottom:8px">Ward codes</h3><div id="codes" class="small muted">Loading…</div></div>`;
+}
+
+async function bindLeader() {
+  $('#mSave').onclick = async () => {
+    const { error } = await sb.from('missions').update({ title: $('#mTitle').value.trim(), description: $('#mDesc').value.trim(), goal: Math.max(1, +$('#mGoal').value || 1), reward: $('#mReward').value.trim() }).eq('id', S.home.mission.id);
+    if (error) return toast(errMsg(error));
+    await loadAll(); toast('Mission updated ⚔️');
+  };
+  $('#nGo').onclick = async () => {
+    const title = $('#nTitle').value.trim(); if (!title) return toast('Add a title');
+    const { error } = await sb.from('quests').insert({ title, description: $('#nDesc').value.trim(), icon: $('#nIcon').value.trim() || '⭐', tier: +$('#nTier').value, xp: Math.max(5, +$('#nXp').value || 25), cooldown_days: +$('#nCool').value });
+    if (error) return toast(errMsg(error));
+    await loadAll(); toast('Quest added 🗺️'); renderMe();
+  };
+  document.querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
+    const on = !b.classList.contains('on'); b.classList.toggle('on', on);
+    const { error } = await sb.from('quests').update({ is_active: on }).eq('id', b.dataset.act);
+    if (error) { b.classList.toggle('on', !on); return toast(errMsg(error)); }
+    const q = S.quests.find(x => x.id === b.dataset.act); if (q) q.is_active = on;
+  });
+  const { data } = await sb.from('settings').select('*').eq('id', 1).maybeSingle();
+  if (!data || !$('#codes')) return;
+  $('#codes').innerHTML = `<input id="sWard" value="${esc(data.ward_name)}"><div style="height:8px"></div>
+    <div class="row"><input id="sJoin" value="${esc(data.join_code)}" placeholder="Join code"><input id="sLead" value="${esc(data.leader_code)}" placeholder="Leader code"></div>
+    <div style="height:10px"></div><button class="btn ghost" id="sSave">Save codes</button>`;
+  $('#sSave').onclick = async () => {
+    const { error } = await sb.from('settings').update({ ward_name: $('#sWard').value.trim(), join_code: $('#sJoin').value.trim(), leader_code: $('#sLead').value.trim() }).eq('id', 1);
+    if (error) return toast(errMsg(error));
+    await loadAll(); toast('Saved ✓');
+  };
+}
+
+boot();
+</script>
+</body>
+</html>
