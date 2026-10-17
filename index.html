@@ -58,6 +58,7 @@ textarea{resize:vertical;min-height:72px}
 
 /* ===== MAP ===== */
 #map{position:fixed;inset:0;bottom:var(--navh);z-index:1;background:#dfe9f3}
+.osm-tiles{filter:saturate(.75) brightness(1.04)}
 .leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.7)!important}
 .pin{position:relative;width:46px;height:46px;border-radius:50% 50% 50% 6px;transform:rotate(-45deg);background:#fff;border:4px solid var(--kc,var(--blue));box-shadow:0 6px 14px rgba(28,35,64,.25);display:grid;place-items:center}
 .pin span{transform:rotate(45deg);font-size:21px}
@@ -581,8 +582,9 @@ function initMap() {
   if (S.map) { drawSpots(); return; }
   const c = (S.home && S.home.center) || [43.7508, -87.7145];
   S.map = L.map('map', { zoomControl: false, attributionControl: true }).setView(c, 14);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>', subdomains: 'abcd', maxZoom: 20
+  // OpenStreetMap tiles: free, no API key (attribution required)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19, className: 'osm-tiles'
   }).addTo(S.map);
   S.layer = L.layerGroup().addTo(S.map);
   S.map.on('click', e => { if (S.addSpot) addSpotSheet(e.latlng); });
