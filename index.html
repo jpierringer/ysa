@@ -2,156 +2,248 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Light the Ward</title>
-<meta name="theme-color" content="#14122b">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Lumins · Sheboygan</title>
+<meta name="theme-color" content="#2D7FF9">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Light the Ward">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2314122b'/%3E%3Ctext x='90' y='122' font-size='100' text-anchor='middle'%3E🕯️%3C/text%3E%3C/svg%3E">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🕯️%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lumins">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cdefs%3E%3CradialGradient id='g' cx='40%25' cy='35%25' r='75%25'%3E%3Cstop offset='0' stop-color='%23FFF0A8'/%3E%3Cstop offset='1' stop-color='%23F5B731'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='180' height='180' rx='40' fill='%232D7FF9'/%3E%3Cellipse cx='90' cy='100' rx='52' ry='46' fill='url(%23g)'/%3E%3Cellipse cx='74' cy='94' rx='7' ry='9' fill='%232A2340'/%3E%3Cellipse cx='106' cy='94' rx='7' ry='9' fill='%232A2340'/%3E%3Cpath d='M82 112 Q90 120 98 112' stroke='%232A2340' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M90 22 Q90 40 108 40 Q90 40 90 58 Q90 40 72 40 Q90 40 90 22Z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='56' r='36' fill='%23F5B731'/%3E%3Ccircle cx='40' cy='52' r='5' fill='%232A2340'/%3E%3Ccircle cx='60' cy='52' r='5' fill='%232A2340'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{
-  --bg:#14122b; --bg2:#1d1a3a; --card:#25214a; --card2:#2e2958; --line:#3a3470;
-  --ink:#f6f1e7; --mute:#b4acd6; --gold:#f5c35b; --gold2:#ffdf94;
-  --t1:#6fd3a0; --t2:#6fb8f2; --t3:#f5b85b; --t4:#f27a8a;
-  --common:#a9a3c9; --uncommon:#6fd3a0; --rare:#6fb8f2; --legendary:#f5c35b;
-  --r:18px;
+  --ink:#1C2340; --mute:#6B7390; --paper:#F3F6FC; --card:#fff; --line:#E3E8F3;
+  --blue:#2D7FF9; --blue2:#1A5FD0; --coral:#FF6B4A; --gold:#FFC83D; --green:#2FBF71; --violet:#8D6CE8;
+  --explore:#2D9CDB; --connect:#FF6B4A; --serve:#2FBF71; --reflect:#8D6CE8;
+  --navh:66px; --r:20px;
+  --shadow:0 6px 20px rgba(28,35,64,.12); --shadow2:0 2px 6px rgba(28,35,64,.08);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px}
-body{background:radial-gradient(120% 60% at 50% -10%,#3b2f6e 0%,var(--bg) 60%) fixed;min-height:100vh}
-h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0;letter-spacing:-.01em}
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-input,textarea,select{font:inherit;color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%}
-textarea{resize:vertical;min-height:70px}
-.wrap{max-width:540px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
-.muted{color:var(--mute)} .small{font-size:13px} .center{text-align:center}
-.row{display:flex;gap:10px;align-items:center} .between{justify-content:space-between} .wrapf{flex-wrap:wrap}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
-.btn{background:var(--gold);color:#2a1e00;font-weight:800;padding:13px 18px;border-radius:14px;width:100%;transition:transform .1s}
-.btn:active{transform:scale(.97)} .btn:disabled{opacity:.5}
-.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line)}
-.btn.sm{width:auto;padding:8px 12px;font-size:14px;border-radius:10px}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:13px;font-weight:700}
-.chip.on{background:var(--gold);color:#2a1e00;border-color:var(--gold)}
-.label{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:18px 2px 8px}
-.bar{height:12px;background:var(--bg2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
-.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
-.bar.big{height:20px}
-/* header */
-.hero{display:flex;gap:14px;align-items:center;margin-bottom:14px}
-.ava{width:56px;height:56px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:30px;border:2px solid var(--gold);flex:none}
-.ava.s{width:36px;height:36px;font-size:19px;border-width:1px}
-.lv{font-size:12px;font-weight:800;color:var(--gold)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
-.stat b{display:block;font-size:20px;font-family:Fraunces,serif}
-.stat span{font-size:12px;color:var(--mute)}
-.bell{position:relative;font-size:22px;padding:6px}
-.bell em{position:absolute;top:0;right:0;background:var(--t4);color:#fff;font-style:normal;font-size:11px;font-weight:800;border-radius:99px;padding:1px 6px}
-/* mission */
-.mission{background:linear-gradient(160deg,#3b2f6e,#25214a 70%);border:1px solid #5a4ca0;position:relative;overflow:hidden}
-.mission:after{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;background:radial-gradient(circle,rgba(245,195,91,.35),transparent 70%)}
-.mission h2{font-size:22px;margin:4px 0}
-.done-flag{background:var(--t1);color:#062;font-weight:800;padding:8px 12px;border-radius:12px;margin-top:10px;text-align:center}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:16px;overscroll-behavior:none}
+h1,h2,h3,.f{font-family:Fredoka,Nunito,sans-serif;font-weight:600;margin:0;letter-spacing:-.005em}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input,textarea,select{font:inherit;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:14px;padding:11px 12px;width:100%;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:72px}
+.muted{color:var(--mute)} .small{font-size:13px} .tiny{font-size:11px} .center{text-align:center} .b{font-weight:800}
+.row{display:flex;gap:10px;align-items:center} .between{justify-content:space-between} .wrapf{flex-wrap:wrap} .grow{flex:1;min-width:0}
+.gap6{gap:6px}
+.btn{display:block;width:100%;background:var(--blue);color:#fff;font-family:Fredoka,sans-serif;font-weight:600;font-size:17px;padding:14px 18px;border-radius:16px;box-shadow:0 4px 0 var(--blue2);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--blue2)}
+.btn:disabled{opacity:.55}
+.btn.coral{background:var(--coral);box-shadow:0 4px 0 #D9472A}
+.btn.gold{background:var(--gold);color:#3A2A00;box-shadow:0 4px 0 #D9A21E}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 3px 0 var(--line)}
+.btn.sm{display:inline-block;width:auto;font-size:14px;padding:8px 13px;border-radius:12px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:999px;background:#fff;border:2px solid var(--line);font-size:13px;font-weight:800;white-space:nowrap}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.label{font-family:Fredoka,sans-serif;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:22px 2px 9px}
+.panel{background:var(--card);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--shadow2)}
+.bar{height:10px;background:#E8EDF7;border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#FF9F43);border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.bar.blue>i{background:linear-gradient(90deg,#5AA2FF,var(--blue))}
+.bar.big{height:16px}
+.ava{width:46px;height:46px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:25px;flex:none;box-shadow:var(--shadow2);border:3px solid #fff}
+.ava.s{width:34px;height:34px;font-size:18px;border-width:2px}
+.ava.l{width:72px;height:72px;font-size:40px}
+.empty{text-align:center;padding:22px 10px;color:var(--mute)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:2px;opacity:.25}
+.dot.on{opacity:1}
+
+/* ===== MAP ===== */
+#map{position:fixed;inset:0;bottom:var(--navh);z-index:1;background:#dfe9f3}
+.leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.7)!important}
+.pin{position:relative;width:46px;height:46px;border-radius:50% 50% 50% 6px;transform:rotate(-45deg);background:#fff;border:4px solid var(--kc,var(--blue));box-shadow:0 6px 14px rgba(28,35,64,.25);display:grid;place-items:center}
+.pin span{transform:rotate(45deg);font-size:21px}
+.pin.done{opacity:.55;filter:saturate(.4)}
+.pin.done:after{content:"✓";position:absolute;transform:rotate(45deg);right:-6px;top:-6px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center}
+.pin:not(.done){animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:rotate(-45deg) translate(2px,-2px)}}
+.me-dot{width:22px;height:22px;border-radius:50%;background:var(--blue);border:4px solid #fff;box-shadow:0 0 0 0 rgba(45,127,249,.5);animation:ping 2s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 18px rgba(45,127,249,0)}100%{box-shadow:0 0 0 0 rgba(45,127,249,0)}}
+#hud{position:fixed;left:0;right:0;top:0;z-index:5;padding:calc(10px + env(safe-area-inset-top)) 12px 0;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+#hud>*{pointer-events:auto}
+.hudcard{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:7px 12px 7px 7px;display:flex;align-items:center;gap:9px}
+.lvchip{font-family:Fredoka,sans-serif;font-weight:700;font-size:12px;color:var(--blue)}
+.beaconpill{margin-left:auto;background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:8px 12px;font-family:Fredoka,sans-serif;font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px}
+.beaconpill .bar{width:60px;height:7px}
+#mapdock{position:fixed;left:0;right:0;bottom:calc(var(--navh) + 12px);z-index:5;padding:0 12px;display:flex;flex-direction:column;gap:10px;align-items:stretch;pointer-events:none}
+#mapdock>*{pointer-events:auto}
+.fabs{display:flex;gap:10px;justify-content:flex-end}
+.fab{width:54px;height:54px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;font-size:24px;position:relative}
+.fab em{position:absolute;top:-3px;right:-3px;background:var(--coral);color:#fff;font-style:normal;font-size:11px;font-weight:900;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px;border:2px solid #fff}
+.fab.on{background:var(--ink);color:#fff}
+.waiting{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#FFE27A,#FFB347);border-radius:22px;padding:10px 16px 10px 10px;box-shadow:0 8px 24px rgba(255,170,40,.45);font-family:Fredoka,sans-serif;font-weight:600;font-size:17px;color:#3A2A00;animation:glow 1.6s ease-in-out infinite}
+.waiting .mini{width:48px;height:48px;flex:none;animation:hop 1s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 8px 34px rgba(255,170,40,.75)}}
+@keyframes hop{50%{transform:translateY(-4px)}}
+.leaderbanner{background:var(--ink);color:#fff;border-radius:14px;padding:10px 14px;font-weight:800;font-size:14px;text-align:center;box-shadow:var(--shadow)}
+
+/* ===== PAGES ===== */
+#page{position:fixed;inset:0;bottom:var(--navh);z-index:8;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper)}
+#page .wrap{max-width:560px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 28px}
+.pagehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pagehead h1{font-size:30px}
+
 /* quests */
-.quest{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--tc);border-radius:16px;padding:12px;margin-bottom:9px;transition:transform .1s}
-.quest:active{transform:scale(.98)}
-.quest.cool{opacity:.45}
-.quest .ic{font-size:26px;width:40px;height:40px;display:grid;place-items:center;background:var(--bg2);border-radius:12px;flex:none}
-.quest .tt{font-weight:800;line-height:1.25}
-.quest .ds{font-size:13px;color:var(--mute);margin-top:2px;line-height:1.3}
-.quest .xp{margin-left:auto;text-align:right;flex:none;font-weight:800;color:var(--gold);font-size:14px}
-.quest .xp small{display:block;color:var(--mute);font-weight:700;font-size:11px}
-.t1{--tc:var(--t1)} .t2{--tc:var(--t2)} .t3{--tc:var(--t3)} .t4{--tc:var(--t4)}
-.bonus{display:inline-block;background:var(--gold);color:#2a1e00;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;margin-left:4px;vertical-align:2px}
-.tierhead{display:flex;align-items:center;gap:8px;margin:20px 2px 8px}
-.tierhead b{font-family:Fraunces,serif;font-size:18px;color:var(--tc)}
-/* feed */
-.post{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.quest{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:#fff;border-radius:18px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow2);position:relative;overflow:hidden}
+.quest:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--pc)}
+.quest:active{transform:scale(.985)}
+.quest.cool{opacity:.5}
+.qic{font-size:24px;width:44px;height:44px;display:grid;place-items:center;border-radius:14px;flex:none;background:color-mix(in srgb,var(--pc) 14%,#fff)}
+.qt{font-weight:800;line-height:1.25}
+.qd{font-size:13px;color:var(--mute);margin-top:2px;line-height:1.3}
+.qxp{margin-left:auto;text-align:right;flex:none;font-family:Fredoka,sans-serif;font-weight:600;color:var(--blue)}
+.qxp small{display:block;font-family:Nunito;font-weight:800;font-size:11px;color:var(--pc)}
+.bonus{display:inline-block;background:var(--gold);color:#3A2A00;font-size:10px;font-weight:900;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:2px}
+.pexplore{--pc:var(--explore)} .pconnect{--pc:var(--connect)} .pserve{--pc:var(--serve)} .preflect{--pc:var(--reflect)}
+.scroller{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:none}
+.scroller::-webkit-scrollbar{display:none}
+.daily{background:linear-gradient(135deg,#2D7FF9,#7B5CFA);color:#fff;border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.daily .quest{box-shadow:none;color:var(--ink)}
+
+/* crew */
+.crewcard{background:linear-gradient(135deg,#FF8A5B,#FF5E7E);color:#fff;border-radius:22px;padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.crewcard:after{content:attr(data-emoji);position:absolute;right:-10px;top:-14px;font-size:110px;opacity:.18}
+.crewcard h2{font-size:26px}
+.member{display:flex;flex-direction:column;align-items:center;gap:4px;width:68px;text-align:center}
+.member .n{font-size:12px;font-weight:800;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:68px}
+.member button{background:rgba(255,255,255,.25);border-radius:99px;padding:3px 9px;font-size:12px;font-weight:800;color:#fff}
+.hunt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:11px 0;border-bottom:1px solid var(--line)}
+.hunt:last-child{border:0}
+.hunt .chk{width:30px;height:30px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;flex:none;font-size:16px}
+.hunt.found .chk{background:var(--green);border-color:var(--green);color:#fff}
+.hunt.found .ht{text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25)}
+.thumb{width:46px;height:46px;border-radius:12px;object-fit:cover;flex:none;background:#eee}
+.post{padding:13px 0;border-bottom:1px solid var(--line)}
 .post:last-child{border:0}
-.post .body{flex:1;min-width:0}
-.post .note{background:var(--bg2);border-radius:10px;padding:8px 10px;margin-top:6px;font-size:14px;font-style:italic}
-.cheer{font-size:13px;font-weight:800;color:var(--mute);padding:4px 0}
-.cheer.done{color:var(--t4)}
-.boardrow{display:flex;align-items:center;gap:10px;padding:7px 0}
-.rank{width:22px;text-align:center;font-weight:800;color:var(--gold)}
-/* cards */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.tcard{--rc:var(--common);aspect-ratio:5/7;border-radius:12px;background:linear-gradient(170deg,#332d63,#1d1a3a);border:2px solid var(--rc);padding:6px;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
-.tcard.r-uncommon{--rc:var(--uncommon)} .tcard.r-rare{--rc:var(--rare)} .tcard.r-legendary{--rc:var(--legendary);box-shadow:0 0 18px rgba(245,195,91,.45)}
-.tcard.r-legendary:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.18) 45%,transparent 60%);animation:shine 3s infinite}
-@keyframes shine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.tc-name{font-family:Fraunces,serif;font-weight:800;font-size:11px;line-height:1.1;min-height:24px}
-.tc-art{flex:1;display:grid;place-items:center;font-size:34px;background:rgba(0,0,0,.25);border-radius:8px;margin:4px 0}
-.tc-flavor{display:none;font-size:12px;font-style:italic;color:var(--mute)}
-.tc-stats{display:flex;justify-content:space-between;font-size:10px;font-weight:800}
-.tc-stats .l{color:var(--gold)} .tc-stats .h{color:var(--t4)}
-.tc-qty{position:absolute;top:4px;right:4px;background:var(--rc);color:#111;font-size:10px;font-weight:800;border-radius:99px;padding:0 5px;z-index:2}
-.tcard.locked{--rc:var(--line);filter:grayscale(1);opacity:.4}
-.tcard.big{width:min(240px,70vw);margin:0 auto;padding:12px}
-.tcard.big .tc-name{font-size:19px;min-height:0}
-.tcard.big .tc-art{font-size:84px;margin:10px 0}
-.tcard.big .tc-flavor{display:block;margin-bottom:8px}
-.tcard.big .tc-stats{font-size:15px}
-.rarity{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--rc)}
-.flip{perspective:900px}
-.flip .inner{transition:transform .9s cubic-bezier(.3,1.4,.5,1);transform-style:preserve-3d;transform:rotateY(180deg)}
-.flip.go .inner{transform:rotateY(0)}
-.flip .back,.flip .front{backface-visibility:hidden}
-.flip .back{position:absolute;inset:0;transform:rotateY(180deg);display:grid;place-items:center;font-size:60px;border-radius:12px;background:repeating-linear-gradient(45deg,#3b2f6e 0 12px,#2e2958 12px 24px);border:2px solid var(--gold);width:min(240px,70vw);margin:0 auto}
-/* badges */
+.post .photo{width:100%;border-radius:16px;margin-top:9px;max-height:380px;object-fit:cover;background:#eef}
+.post .note{background:var(--paper);border-radius:12px;padding:8px 11px;margin-top:7px;font-size:14px}
+.cheer{font-size:13px;font-weight:800;color:var(--mute)}
+.cheer.done{color:var(--coral)}
+.listrow{display:flex;align-items:center;gap:11px;padding:8px 0}
+.rank{width:22px;text-align:center;font-family:Fredoka;font-weight:700;color:var(--mute)}
+.hearts{color:var(--coral);letter-spacing:1px;font-size:12px}
+.bell{position:relative;font-size:24px;width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:var(--shadow2);display:grid;place-items:center}
+.bell em{position:absolute;top:-2px;right:-2px;background:var(--coral);color:#fff;font-style:normal;font-size:11px;font-weight:900;min-width:19px;height:19px;border-radius:10px;display:grid;place-items:center;padding:0 4px}
+
+/* dex */
+.lineblock{background:#fff;border-radius:22px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow2)}
+.dexrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mon{border-radius:16px;padding:6px 4px 9px;text-align:center;background:color-mix(in srgb,var(--lc) 13%,#fff);position:relative}
+.mon .art{width:100%;aspect-ratio:1}
+.mon .nm{font-family:Fredoka;font-weight:600;font-size:13px;line-height:1.1}
+.mon .qty{position:absolute;top:6px;right:6px;background:#fff;border-radius:99px;font-size:10px;font-weight:900;padding:1px 6px}
+.mon.sil{background:#F0F2F7}
+.mon.sil .art svg{filter:brightness(0) opacity(.13)}
+.mon.sil .nm{color:#B3B9CC}
+.grow-btn{margin-top:5px;font-size:11px;font-weight:900;color:#fff;background:var(--green);border-radius:99px;padding:3px 8px;display:inline-block;animation:glow2 1.4s infinite}
+@keyframes glow2{50%{box-shadow:0 0 0 4px rgba(47,191,113,.25)}}
+.sparkpill{font-family:Fredoka;font-weight:600;font-size:14px;color:#B7860B;background:#FFF5D6;border-radius:99px;padding:4px 10px}
+.virtue{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--lc)}
+
+/* me */
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:#fff;border-radius:16px;padding:10px 4px;text-align:center;box-shadow:var(--shadow2)}
+.stat b{display:block;font-family:Fredoka;font-weight:600;font-size:21px}
+.stat span{font-size:11px;color:var(--mute);font-weight:700}
 .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.badge{text-align:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px 4px}
-.badge .e{font-size:26px} .badge .n{font-size:11px;font-weight:800;margin-top:4px;line-height:1.15}
-.badge.off{opacity:.3;filter:grayscale(1)}
+.badge{text-align:center;background:#fff;border-radius:16px;padding:10px 3px;box-shadow:var(--shadow2)}
+.badge .e{font-size:28px} .badge .n{font-size:11px;font-weight:800;margin-top:3px;line-height:1.15}
+.badge.off{opacity:.35;filter:grayscale(1)}
+.avpick{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.avpick button{font-size:23px;padding:5px 0;border-radius:11px;background:var(--paper)}
+.avpick button.on{background:var(--gold)}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0}
+.sw{width:52px;height:31px;border-radius:99px;background:#D5DBE8;position:relative;flex:none;transition:background .2s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--green)} .sw.on:after{left:24px}
+
 /* nav */
-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,18,43,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
-nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11px;font-weight:800;color:var(--mute)}
-nav button span{font-size:22px;filter:grayscale(.6);transition:transform .15s}
-nav button.on{color:var(--gold)} nav button.on span{filter:none;transform:translateY(-2px) scale(1.1)}
+nav{position:fixed;left:0;right:0;bottom:0;height:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;z-index:20;box-shadow:0 -4px 18px rgba(28,35,64,.08)}
+nav .in{max-width:560px;margin:0 auto;height:var(--navh);display:grid;grid-template-columns:repeat(5,1fr)}
+nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:Fredoka;font-weight:600;font-size:11px;color:#9AA2BC;position:relative}
+nav button span{font-size:23px;filter:grayscale(1) opacity(.6);transition:transform .15s}
+nav button.on{color:var(--blue)} nav button.on span{filter:none;transform:translateY(-2px) scale(1.12)}
+nav button em{position:absolute;top:7px;left:calc(50% + 6px);background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+body{padding-bottom:var(--navh)}
+
 /* sheet */
 .sheet{position:fixed;inset:0;z-index:40;display:none}
 .sheet.open{display:block}
-.sheet .scrim{position:absolute;inset:0;background:rgba(5,4,15,.7);animation:fade .2s}
-.sheet .box{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--line);padding:18px 18px calc(24px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.9,.3,1)}
-.sheet .box .in{max-width:520px;margin:0 auto}
-.grab{width:44px;height:5px;background:var(--line);border-radius:9px;margin:0 auto 14px}
+.sheet .scrim{position:absolute;inset:0;background:rgba(20,24,45,.45);animation:fade .2s}
+.sheet .box{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:#fff;border-radius:28px 28px 0 0;padding:14px 18px calc(26px + env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,.9,.3,1)}
+.sheet .box .in{max-width:540px;margin:0 auto}
+.grab{width:46px;height:5px;background:var(--line);border-radius:9px;margin:0 auto 14px}
 @keyframes up{from{transform:translateY(100%)}} @keyframes fade{from{opacity:0}}
-.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:var(--bg);font-weight:800;padding:11px 16px;border-radius:14px;z-index:60;max-width:90vw;text-align:center;animation:fade .2s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-.toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0}
-.sw{width:50px;height:30px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background .2s}
-.sw:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
-.sw.on{background:var(--t1)} .sw.on:after{left:23px}
-.avpick{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
-.avpick button{font-size:24px;padding:6px 0;border-radius:10px;background:var(--card)}
-.avpick button.on{background:var(--gold)}
-.confetti{position:fixed;top:-10px;z-index:70;pointer-events:none;font-size:20px;animation:fall linear forwards}
-@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
-.xpbig{font-family:Fraunces,serif;font-size:42px;color:var(--gold);text-align:center;animation:pop .5s}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:#fff;font-weight:800;padding:12px 18px;border-radius:16px;z-index:90;max-width:92vw;text-align:center;animation:drop .25s;box-shadow:var(--shadow)}
+@keyframes drop{from{transform:translate(-50%,-20px);opacity:0}}
+.photopick{display:flex;align-items:center;gap:10px;border:2px dashed var(--line);border-radius:16px;padding:10px;cursor:pointer}
+.photopick img{width:56px;height:56px;border-radius:10px;object-fit:cover;display:none}
+.photopick.has img{display:block}
+.qrbox{background:#fff;border-radius:22px;padding:16px;display:grid;place-items:center;box-shadow:var(--shadow2);border:2px solid var(--line);width:max-content;margin:0 auto}
+.code{font-family:Fredoka;font-weight:700;font-size:34px;letter-spacing:.18em;text-align:center;color:var(--blue)}
+
+/* catch */
+#catch{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(18px + env(safe-area-inset-top)) 18px calc(26px + env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 42%,var(--cb1,#FFF4C9) 0%,var(--cb2,#7FB6FF) 75%);overflow:hidden}
+#catch.open{display:flex}
+#catch .ctop{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;color:#fff;font-family:Fredoka;font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.2)}
+#catch .cx{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.3);color:#fff;font-size:18px}
+.cstage{position:relative;width:min(300px,78vw);aspect-ratio:1;cursor:pointer;flex:none}
+.cmon{position:absolute;inset:12%;animation:float 2.2s ease-in-out infinite;transition:transform .35s ease-in,opacity .35s}
+.cmon.in{transform:scale(0) translateY(40px);opacity:0}
+@keyframes float{50%{transform:translateY(-10px)}}
+.cring{position:absolute;left:50%;top:52%;width:86%;height:86%;border-radius:50%;border:5px solid #fff;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 18px rgba(255,255,255,.6)}
+.corb{position:absolute;left:50%;bottom:-160px;width:58px;height:58px;margin-left:-29px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0%,#FFE48A 35%,#FFB020 70%,#E08A00 100%);box-shadow:0 0 26px rgba(255,200,60,.9);opacity:0;transition:bottom .45s cubic-bezier(.3,1.3,.6,1),transform .45s,opacity .1s}
+.corb.fly{bottom:42%;opacity:1}
+.corb.wob{animation:wob .6s ease-in-out 3}
+@keyframes wob{25%{transform:rotate(-22deg)}75%{transform:rotate(22deg)}}
+.corb.burst{animation:burst .5s forwards}
+@keyframes burst{to{transform:scale(2.4);opacity:0}}
+.cname{font-family:Fredoka;font-weight:700;font-size:30px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.2);text-align:center}
+.cstars{color:#fff;text-align:center;font-size:15px;opacity:.95}
+.cthrow{width:100%;max-width:420px}
+.chit{font-family:Fredoka;font-weight:700;font-size:40px;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.25);position:absolute;left:0;right:0;top:12%;text-align:center;animation:pop .5s}
 @keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.15)}}
-.empty{text-align:center;padding:24px 10px;color:var(--mute)}
-.splash{min-height:80vh;display:grid;place-items:center;text-align:center}
-.flame{font-size:64px;animation:flick 2s infinite alternate}
-@keyframes flick{to{transform:scale(1.06) rotate(2deg)}}
-a{color:var(--gold2)}
+.result{background:#fff;border-radius:28px;padding:18px;width:100%;max-width:420px;box-shadow:0 20px 50px rgba(0,0,0,.2);animation:up .35s cubic-bezier(.2,.9,.3,1);text-align:center}
+.result .art{width:150px;height:150px;margin:-80px auto 0;animation:pop .6s}
+.newtag{display:inline-block;background:var(--coral);color:#fff;font-weight:900;font-size:12px;border-radius:8px;padding:3px 8px;margin-bottom:4px}
+.confetti{position:fixed;top:-20px;z-index:95;pointer-events:none;font-size:20px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+/* join */
+.join{min-height:100%;background:linear-gradient(180deg,#2D7FF9 0%,#7B5CFA 55%,var(--paper) 55.1%);padding:calc(26px + env(safe-area-inset-top)) 16px 30px}
+.join .wrap{max-width:480px;margin:0 auto}
+.starter{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.starter button{background:var(--paper);border-radius:18px;padding:6px 4px 10px;border:3px solid transparent;text-align:center}
+.starter button.on{border-color:var(--blue);background:#EAF2FF}
+.starter .art{width:100%;aspect-ratio:1}
+.splash{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,#2D7FF9,#7B5CFA);color:#fff;text-align:center;z-index:100}
+.splash .art{width:120px;height:120px;margin:0 auto;animation:float 2s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="app" class="wrap"><div class="splash"><div><div class="flame">🕯️</div><p class="muted">Lighting the lamps…</p></div></div></div>
+<div id="map"></div>
+<div id="hud" hidden></div>
+<div id="mapdock" hidden></div>
+<div id="page" hidden><div class="wrap" id="pageBody"></div></div>
 <nav id="nav" hidden><div class="in">
-  <button data-tab="home"><span>🏠</span>Home</button>
-  <button data-tab="quests"><span>🗺️</span>Quests</button>
-  <button data-tab="ward"><span>👥</span>Ward</button>
-  <button data-tab="cards"><span>🃏</span>Cards</button>
+  <button data-tab="map"><span>🗺️</span>Map</button>
+  <button data-tab="quests"><span>📜</span>Quests</button>
+  <button data-tab="crew"><span>🧭</span>Crew</button>
+  <button data-tab="dex"><span>📖</span>Lumidex</button>
   <button data-tab="me"><span>🙂</span>Me</button>
 </div></nav>
-<div id="sheet" class="sheet"><div class="scrim" onclick="closeSheet()"></div><div class="box"><div class="in"><div class="grab"></div><div id="sheetBody"></div></div></div></div>
+<div id="sheet" class="sheet"><div class="scrim"></div><div class="box"><div class="in"><div class="grab"></div><div id="sheetBody"></div></div></div></div>
+<div id="catch"></div>
+<div id="splash" class="splash"><div><div class="art" id="splashArt"></div><h1 style="font-size:34px;margin-top:10px">Lumins</h1><p style="opacity:.85;margin:4px 0 0">Waking up the Lumins…</p></div></div>
 
 <script>
 /* ============ CONFIG — paste from Supabase → Settings → API ============ */
@@ -162,486 +254,1017 @@ const SUPABASE_ANON_KEY = 'sb_publishable_eGv0iwOKZ1DP6JixaXZnrQ_vI6nax4S';
 const configured = !SUPABASE_URL.includes('YOUR-PROJECT') && !SUPABASE_ANON_KEY.includes('YOUR-ANON');
 const sb = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: 'ysa' } }) : null;
 
-const TIERS = {
-  1: { name: 'Quiet', emoji: '🌱', desc: 'Just you and heaven — no one else needed' },
-  2: { name: 'Reach Out', emoji: '💬', desc: 'A text, a hello, a kind word' },
-  3: { name: 'Together', emoji: '🤝', desc: 'One-on-one or a small group' },
-  4: { name: 'Gather', emoji: '🔥', desc: 'Bigger groups & bringing others in' }
+/* ---------- game data ---------- */
+const LINES = {
+  glim:   { virtue: 'Hope',      c: ['#FFF0A8', '#F5B731'] },
+  seed:   { virtue: 'Faith',     c: ['#CDF5B8', '#3FA34D'] },
+  drip:   { virtue: 'Renewal',   c: ['#C9EBFF', '#2F8FE0'] },
+  pebble: { virtue: 'Steadfast', c: ['#F1E7D8', '#9A8670'] },
+  wisp:   { virtue: 'Peace',     c: ['#ECE3FF', '#8D6CE8'] },
+  finch:  { virtue: 'Joy',       c: ['#FFD7D0', '#F06A5D'] },
+  lamp:   { virtue: 'Kindness',  c: ['#FFE0BC', '#F0832D'] },
+  shore:  { virtue: 'Belonging', c: ['#C6FAEE', '#1FAE9A'] }
 };
-const BATTERY = { low: { label: '🪫 Low', tiers: [1, 2] }, mid: { label: '🔋 Medium', tiers: [1, 2, 3] }, full: { label: '⚡ Full', tiers: [1, 2, 3, 4] } };
-const RAR = { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary' };
+const LINE_ORDER = ['glim', 'seed', 'drip', 'pebble', 'wisp', 'finch', 'lamp', 'shore'];
+const PATHS = {
+  explore: { name: 'Explore', emoji: '🧭' }, connect: { name: 'Connect', emoji: '💬' },
+  serve:   { name: 'Serve',   emoji: '🤲' }, reflect: { name: 'Reflect', emoji: '🌙' }
+};
+const ENERGY = { 1: 'Solo', 2: 'Small group', 3: 'Big group' };
+const BATTERY = { low: { label: '🪫 Low-key', max: 1 }, mid: { label: '🔋 A few people', max: 2 }, full: { label: '⚡ Bring it on', max: 3 } };
+const KINDS = {
+  lake: { n: 'Lakeshore', c: '#2D9CDB' }, park: { n: 'Park', c: '#2FBF71' }, town: { n: 'Downtown', c: '#FF6B4A' },
+  quiet: { n: 'Quiet spot', c: '#8D6CE8' }, gather: { n: 'Gathering place', c: '#FFB020' }
+};
 const AVATARS = ['🙂','😎','🤠','🦊','🐻','🦉','🐢','🦁','🐼','🐙','🌻','🌵','🍀','⭐','🌙','☀️','🔥','🌊','🎸','🎮','📚','🏀','⚽','🎨'];
-const TITLES = ['Seeker','Friend','Neighbor','Helper','Lamplighter','Shepherd','Peacemaker','Pillar','Beacon','Disciple'];
-const ENCOURAGE = ["Glad you're in our ward 💛", 'Thinking of you this week 🙏', "You've got this! 💪", 'Your quest inspired me ✨', 'Save me a seat Sunday? 🪑'];
+const TITLES = ['Rookie','Wanderer','Scout','Explorer','Trailblazer','Pathfinder','Navigator','Lightkeeper','Guide','Legend'];
+const HIFIVES = ["Glad you're here 💛", 'High five! 🙌', "You've got this 💪", 'Saw your post — love it ✨', 'Hang out this week? 🍕'];
+const FRIEND_LV = [[15, 'Best friends', 4], [7, 'Good friends', 3], [3, 'Friends', 2], [1, 'Acquaintances', 1]];
+const QUALITY = ['Nice!', 'Great!', 'Excellent!'];
 
-const S = { tab: 'home', uid: null, user: null, me: null, players: [], quests: [], comps: [], cards: [], myCards: [], inbox: [], home: null, feed: null, cheered: new Set(), battery: lsGet('battery') || 'mid' };
+const S = {
+  tab: 'map', uid: null, user: null, me: null, home: null, players: [], quests: [], spots: [], species: [], dex: [], sparks: [],
+  acts: [], meets: [], inbox: [], pending: [], events: [], feed: null, cheered: new Set(),
+  battery: lsGet('battery') || 'mid', qpath: 'all', map: null, layer: null, meMarker: null, pos: null, addSpot: false
+};
 
 /* ---------- utils ---------- */
 const $ = s => document.querySelector(s);
+const wait = ms => new Promise(r => setTimeout(r, ms));
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function lsGet(k) { try { return localStorage.getItem('ltw_' + k); } catch (e) { return null; } }
-function lsSet(k, v) { try { localStorage.setItem('ltw_' + k, v); } catch (e) {} }
-function toast(msg, ms = 2600) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+function lsGet(k) { try { return localStorage.getItem('lum_' + k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem('lum_' + k, v); } catch (e) {} }
+function toast(msg, ms = 2800) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
 function errMsg(e) { return (e && (e.message || e.error_description)) || 'Something went wrong'; }
 function tz() { return (S.home && S.home.timezone) || 'America/Chicago'; }
 function localDate(ts) { return new Date(ts).toLocaleDateString('en-CA', { timeZone: tz() }); }
 function dnum(d) { const [y, m, dd] = d.split('-').map(Number); return Date.UTC(y, m - 1, dd) / 864e5; }
-function daysBetween(a, b) { return dnum(b) - dnum(a); }
 function weekStart(d) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() - x.getUTCDay()); return x.toISOString().slice(0, 10); }
 function shiftWeek(d, n) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + 7 * n); return x.toISOString().slice(0, 10); }
-function ago(ts) { const s = (Date.now() - new Date(ts)) / 1000; if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + 'm'; if (s < 86400) return Math.floor(s / 3600) + 'h'; return Math.floor(s / 86400) + 'd'; }
-function levelInfo(xp) { const lv = Math.floor(Math.sqrt(xp / 50)) + 1; const cur = 50 * (lv - 1) ** 2, next = 50 * lv ** 2; return { lv, title: TITLES[Math.min(lv - 1, TITLES.length - 1)], pct: Math.round((xp - cur) / (next - cur) * 100), toNext: next - xp }; }
-function player(id) { return S.players.find(p => p.id === id); }
-function confetti(n = 28) { const e = ['✨', '⭐', '💛', '🎉', '🕯️']; for (let i = 0; i < n; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.textContent = e[i % e.length]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDuration = 1.8 + Math.random() * 1.8 + 's'; c.style.animationDelay = Math.random() * .4 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 4200); } }
-function openSheet(html) { $('#sheetBody').innerHTML = html; $('#sheet').classList.add('open'); }
+function ago(ts) { const s = (Date.now() - new Date(ts)) / 1000; if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + 'm ago'; if (s < 86400) return Math.floor(s / 3600) + 'h ago'; return Math.floor(s / 86400) + 'd ago'; }
+function when(ts) { return new Date(ts).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+function levelInfo(xp) { const lv = Math.floor(Math.sqrt(xp / 60)) + 1; const cur = 60 * (lv - 1) ** 2, next = 60 * lv ** 2; return { lv, title: TITLES[Math.min(lv - 1, TITLES.length - 1)], pct: Math.round((xp - cur) / (next - cur) * 100), toNext: next - xp }; }
+function player(id) { return S.players.find(p => p.id === id) || { display_name: 'Someone', avatar: '🙂' }; }
+function species(id) { return S.species.find(s => s.id === id); }
+function owned(id) { const d = S.dex.find(x => x.species_id === id); return d ? d.qty : 0; }
+function sparksFor(line) { const s = S.sparks.find(x => x.line === line); return s ? s.qty : 0; }
+function friendLevel(days) { return FRIEND_LV.find(f => days >= f[0]) || FRIEND_LV[3]; }
+function distM(a, b) { const R = 6371000, t = x => x * Math.PI / 180; const dLa = t(b.lat - a.lat), dLo = t(b.lng - a.lng); const h = Math.sin(dLa / 2) ** 2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+function fmtDist(m) { return m >= 1000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m) + ' m'; }
+function confetti(n = 30) { const e = ['✨', '⭐', '💛', '🎉', '💫']; for (let i = 0; i < n; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.textContent = e[i % e.length]; c.style.left = Math.random() * 100 + 'vw'; c.style.animationDuration = 1.8 + Math.random() * 1.8 + 's'; c.style.animationDelay = Math.random() * .4 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 4400); } }
+function openSheet(html) { $('#sheetBody').innerHTML = html; $('#sheet').classList.add('open'); $('#sheet .box').scrollTop = 0; }
 function closeSheet() { $('#sheet').classList.remove('open'); }
-function isUuid(s) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || ''); }
+$('#sheet .scrim').onclick = closeSheet;
+function bindSw(root) { root.querySelectorAll('.sw').forEach(s => s.onclick = () => s.classList.toggle('on')); }
 
-/* ---------- boot ---------- */
-(function captureRef() { const r = new URLSearchParams(location.search).get('ref'); if (isUuid(r)) lsSet('ref', r); })();
+/* ---------- Lumin art (procedural SVG) ---------- */
+let svgN = 0;
+function star(x, y, r) { return `M${x} ${y - r} Q${x} ${y} ${x + r} ${y} Q${x} ${y} ${x} ${y + r} Q${x} ${y} ${x - r} ${y} Q${x} ${y} ${x} ${y - r}Z`; }
+function lumiSVG(line, stage) {
+  const L = LINES[line] || LINES.glim, [c1, c2] = L.c, id = 'lg' + (++svgN);
+  const cx = 60, cy = 74, rx = 21 + stage * 5, ry = 19 + stage * 4.5, top = cy - ry;
+  const F = `url(#${id})`;
+  let back = '', front = '';
+  if (stage === 3) back += `<circle cx="60" cy="68" r="56" fill="url(#${id}a)"/>`;
+  switch (line) {
+    case 'glim':
+      front += `<path d="${star(cx, top - 9, 9 + stage)}" fill="#fff" stroke="${c2}" stroke-width="2"/>`;
+      if (stage >= 2) front += `<path d="${star(cx - rx - 4, top + 6, 5)}" fill="${c2}"/><path d="${star(cx + rx + 4, top + 6, 5)}" fill="${c2}"/>`;
+      if (stage === 3) for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; back += `<line x1="${cx + Math.cos(a) * (rx + 8)}" y1="${cy + Math.sin(a) * (ry + 8)}" x2="${cx + Math.cos(a) * (rx + 18)}" y2="${cy + Math.sin(a) * (ry + 18)}" stroke="${c2}" stroke-width="4" stroke-linecap="round" opacity=".7"/>`; }
+      break;
+    case 'seed':
+      back += `<path d="M${cx} ${top + 4} Q${cx + 2} ${top - 8} ${cx} ${top - 16}" stroke="${c2}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+      back += `<ellipse cx="${cx + 8}" cy="${top - 13}" rx="9" ry="4.5" fill="${c2}" transform="rotate(-30 ${cx + 8} ${top - 13})"/>`;
+      if (stage >= 2) back += `<ellipse cx="${cx - 8}" cy="${top - 9}" rx="9" ry="4.5" fill="${c2}" transform="rotate(30 ${cx - 8} ${top - 9})"/>`;
+      if (stage === 3) back = `<circle cx="60" cy="68" r="56" fill="url(#${id}a)"/><circle cx="${cx}" cy="${top - 14}" r="16" fill="${c2}"/><circle cx="${cx - 16}" cy="${top - 4}" r="12" fill="${c2}"/><circle cx="${cx + 16}" cy="${top - 4}" r="12" fill="${c2}"/><circle cx="${cx - 6}" cy="${top - 20}" r="5" fill="${c1}" opacity=".6"/>`;
+      break;
+    case 'drip':
+      back += `<path d="M${cx - rx * .62} ${top + ry * .55} Q${cx - 2} ${top - 6 - stage * 4} ${cx} ${top - 12 - stage * 5} Q${cx + 2} ${top - 6 - stage * 4} ${cx + rx * .62} ${top + ry * .55}Z" fill="${F}"/>`;
+      if (stage >= 2) front += `<circle cx="${cx + rx + 6}" cy="${top + 4}" r="4" fill="${c1}" stroke="${c2}" stroke-width="1.5"/><circle cx="${cx + rx + 12}" cy="${top - 6}" r="2.5" fill="${c1}" stroke="${c2}" stroke-width="1.2"/>`;
+      if (stage === 3) front += `<path d="M${cx - rx} ${cy + ry * .55} q8 -7 16 0 t16 0 t16 0 t16 0" stroke="#fff" stroke-width="3.5" fill="none" opacity=".85" stroke-linecap="round"/>`;
+      break;
+    case 'pebble':
+      front += `<path d="M${cx - rx * .62} ${cy - ry * .25} L${cx - rx * .2} ${cy - ry * .78} L${cx + rx * .35} ${cy - ry * .72}" stroke="#fff" stroke-width="3" fill="none" opacity=".6" stroke-linejoin="round" stroke-linecap="round"/>`;
+      if (stage >= 2) front += `<ellipse cx="${cx - 7}" cy="${top + 2}" rx="8" ry="4" fill="#6CC46A"/><ellipse cx="${cx + 5}" cy="${top + 1}" rx="6" ry="3.5" fill="#86D97F"/>`;
+      if (stage === 3) back += `<path d="M${cx} ${top - 26} L${cx + 9} ${top - 6} L${cx} ${top + 2} L${cx - 9} ${top - 6}Z" fill="#9FD8FF" stroke="#5AA9E6" stroke-width="2"/>`;
+      break;
+    case 'wisp':
+      back += `<path d="M${cx + rx * .6} ${cy + ry * .4} Q${cx + rx + 22} ${cy + 4} ${cx + rx + 10} ${cy - 18} Q${cx + rx + 2} ${cy - 26} ${cx + rx - 4} ${cy - 14}" stroke="${c2}" stroke-width="${6 + stage}" fill="none" stroke-linecap="round" opacity=".75"/>`;
+      front += `<path d="M${cx - 4} ${top + 2} Q${cx} ${top - 12} ${cx + 9} ${top - 8}" stroke="${c2}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+      if (stage >= 2) back += `<path d="M${cx - rx * .6} ${cy + ry * .4} Q${cx - rx - 22} ${cy + 4} ${cx - rx - 10} ${cy - 18}" stroke="${c2}" stroke-width="${5 + stage}" fill="none" stroke-linecap="round" opacity=".55"/>`;
+      if (stage === 3) front += `<path d="${star(cx - rx - 8, top - 4, 5)}" fill="#fff"/><path d="${star(cx + rx + 10, top + 10, 4)}" fill="#fff"/>`;
+      break;
+    case 'finch':
+      back += `<ellipse cx="${cx - rx + 2}" cy="${cy + 4}" rx="9" ry="${13 + stage}" fill="${c2}" transform="rotate(28 ${cx - rx + 2} ${cy + 4})"/><ellipse cx="${cx + rx - 2}" cy="${cy + 4}" rx="9" ry="${13 + stage}" fill="${c2}" transform="rotate(-28 ${cx + rx - 2} ${cy + 4})"/>`;
+      if (stage >= 2) back += `<path d="M${cx - 6} ${top + 4} Q${cx - 8} ${top - 12} ${cx} ${top - 16} Q${cx + 2} ${top - 6} ${cx + 4} ${top + 3}Z" fill="${c2}"/>`;
+      if (stage === 3) back += `<path d="M${cx - 8} ${cy + ry - 4} L${cx - 22} ${cy + ry + 18} M${cx} ${cy + ry - 2} L${cx} ${cy + ry + 22} M${cx + 8} ${cy + ry - 4} L${cx + 22} ${cy + ry + 18}" stroke="${c2}" stroke-width="6" stroke-linecap="round"/>`;
+      break;
+    case 'lamp': {
+      const eh = 14 + stage * 3;
+      back += `<path d="M${cx - rx * .75} ${top + 10} L${cx - rx * .8} ${top - eh} L${cx - rx * .1} ${top + 3}Z" fill="${c2}"/><path d="M${cx + rx * .75} ${top + 10} L${cx + rx * .8} ${top - eh} L${cx + rx * .1} ${top + 3}Z" fill="${c2}"/>`;
+      back += `<path d="M${cx + rx * .7} ${cy + ry * .5} Q${cx + rx + 20} ${cy + 10} ${cx + rx + 14} ${cy - 14}" stroke="${c2}" stroke-width="8" fill="none" stroke-linecap="round"/>`;
+      front += `<circle cx="${cx + rx + 14}" cy="${cy - 16}" r="${5 + stage * 2}" fill="#FFE27A" stroke="#fff" stroke-width="2"/>`;
+      if (stage >= 2) back += `<circle cx="${cx + rx + 14}" cy="${cy - 16}" r="${12 + stage * 4}" fill="#FFE27A" opacity=".35"/>`;
+      break;
+    }
+    case 'shore': {
+      const sr = 11 + stage * 3;
+      back += `<path d="M${cx - sr} ${top + 6} A${sr} ${sr} 0 0 1 ${cx + sr} ${top + 6}Z" fill="${c2}"/>`;
+      for (let i = -2; i <= 2; i++) back += `<line x1="${cx}" y1="${top + 6}" x2="${cx + Math.sin(i * .6) * sr}" y2="${top + 6 - Math.cos(i * .6) * sr}" stroke="${c1}" stroke-width="1.6"/>`;
+      if (stage === 3) front += `<circle cx="${cx}" cy="${top - sr + 4}" r="5" fill="#fff" stroke="#BFE9E2" stroke-width="2"/>`;
+      if (stage >= 2) front += `<path d="M${cx - rx} ${cy + ry * .6} q7 -6 14 0 t14 0" stroke="#fff" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/>`;
+      break;
+    }
+  }
+  const ex = 7 + stage * 2, ey = cy - 3;
+  const eyes = `<g fill="#2A2340"><ellipse cx="${cx - ex}" cy="${ey}" rx="3.6" ry="4.6"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.6" ry="4.6"/></g><g fill="#fff"><circle cx="${cx - ex + 1.3}" cy="${ey - 1.8}" r="1.4"/><circle cx="${cx + ex + 1.3}" cy="${ey - 1.8}" r="1.4"/></g><g fill="#FF8FA3" opacity=".55"><ellipse cx="${cx - ex - 6}" cy="${ey + 7}" rx="4.2" ry="2.5"/><ellipse cx="${cx + ex + 6}" cy="${ey + 7}" rx="4.2" ry="2.5"/></g>`;
+  const mouth = line === 'finch'
+    ? `<path d="M${cx - 4} ${ey + 6} L${cx + 4} ${ey + 6} L${cx} ${ey + 11}Z" fill="#FFB020"/>`
+    : `<path d="M${cx - 4} ${ey + 7} Q${cx} ${ey + 11} ${cx + 4} ${ey + 7}" stroke="#2A2340" stroke-width="1.9" fill="none" stroke-linecap="round"/>`;
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><radialGradient id="${id}" cx="38%" cy="32%" r="78%"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient><radialGradient id="${id}a"><stop offset="0" stop-color="${c1}" stop-opacity=".95"/><stop offset="1" stop-color="${c1}" stop-opacity="0"/></radialGradient></defs>${back}<ellipse cx="60" cy="${cy + ry + 5}" rx="${rx * .8}" ry="4" fill="#000" opacity=".1"/><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${F}"/><ellipse cx="${cx - rx * .35}" cy="${cy - ry * .45}" rx="${rx * .25}" ry="${ry * .16}" fill="#fff" opacity=".45"/>${front}${eyes}${mouth}</svg>`;
+}
+function spSVG(sp) { return sp ? lumiSVG(sp.line, sp.stage) : ''; }
+$('#splashArt').innerHTML = lumiSVG('glim', 1);
 
+/* ---------- invite / meet / transfer links ---------- */
+(function captureLinks() {
+  const q = new URLSearchParams(location.search), m = q.get('meet'), t = q.get('signin');
+  if (m && /^[A-Za-z0-9]{5}$/.test(m)) lsSet('meet', m.toUpperCase());
+  if (t && /^[A-Za-z0-9]{8}$/.test(t)) lsSet('signin', t.toUpperCase());
+  if (m || t) history.replaceState(null, '', location.pathname);
+})();
+function meetUrl(code) { return location.origin + location.pathname + '?meet=' + code; }
+function signinUrl(code) { return location.origin + location.pathname + '?signin=' + code; }
+
+/* ---------- boot & data ---------- */
+async function ensureSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) return session;
+  const r = await sb.auth.signInAnonymously();
+  if (r.error) throw r.error;
+  return r.data.session;
+}
 async function boot() {
   if (!configured) {
-    $('#app').innerHTML = `<div class="splash"><div class="panel"><div class="flame">🛠️</div><h2>Almost ready</h2><p class="muted">Open <b>index.html</b> and paste your Supabase URL and anon key at the top of the script.</p></div></div>`;
+    $('#splash').innerHTML = `<div style="padding:24px;max-width:420px"><div class="art">${lumiSVG('lamp', 2)}</div><h2 style="font-size:26px;margin:10px 0">Almost ready</h2><p style="opacity:.9">Open <b>index.html</b> and paste your Supabase URL and anon key at the top of the script.</p></div>`;
     return;
+  }
+  const pendingSignin = lsGet('signin');
+  if (pendingSignin) {
+    lsSet('signin', '');
+    try {
+      await ensureSession();
+      const { data, error } = await sb.rpc('redeem_code', { p_code: pendingSignin });
+      if (error) throw error;
+      setTimeout(() => toast(`Welcome back, ${data.name}! 👋`, 3500), 600);
+    } catch (e) { setTimeout(() => toast(errMsg(e), 4000), 600); }
   }
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return renderJoin();
-  S.uid = session.user.id; S.user = session.user;
-  const { data: me } = await sb.from('players').select('*').eq('id', S.uid).maybeSingle();
-  if (!me) return renderJoin();
-  S.me = me;
+  const { data: who } = await sb.rpc('whoami');
+  if (!who) return renderJoin();
+  S.uid = who.id; S.me = who; S.username = who.username;
   await loadAll();
-  $('#nav').hidden = false;
-  render();
+  $('#splash')?.remove();
+  document.body.querySelector('.join')?.remove();
+  ['#nav', '#hud', '#mapdock'].forEach(s => $(s).hidden = false);
+  initMap();
+  go(S.tab);
+  startWatch();
+  handlePendingMeet();
 }
 
 async function loadAll() {
   const uid = S.uid;
-  const [home, quests, comps, cards, myCards, players, inbox] = await Promise.all([
+  const res = await Promise.all([
     sb.rpc('ward_home'),
-    sb.from('quests').select('*').order('tier').order('xp'),
-    sb.from('completions').select('id,quest_id,quest_title,tier,xp,partner_id,card_id,created_at').eq('player_id', uid).order('created_at', { ascending: false }).limit(1000),
-    sb.from('cards').select('*').order('id'),
-    sb.from('player_cards').select('*').eq('player_id', uid),
-    sb.from('players').select('id,display_name,avatar,is_leader,xp,hide_from_board,created_at').order('display_name'),
-    sb.from('kudos').select('*').eq('to_id', uid).order('created_at', { ascending: false }).limit(50)
+    sb.from('quests').select('*').order('energy').order('xp'),
+    sb.from('spots').select('*').order('name'),
+    sb.from('species').select('*').order('id'),
+    sb.from('dex').select('species_id,qty').eq('player_id', uid),
+    sb.from('sparks').select('line,qty').eq('player_id', uid),
+    sb.from('activity').select('id,kind,ref_id,title,path,xp,partner_id,created_at').eq('player_id', uid).order('created_at', { ascending: false }).limit(1000),
+    sb.from('players').select('id,display_name,avatar,is_leader,ghost,xp,created_at').order('display_name'),
+    sb.from('meets').select('a,b,met_on'),
+    sb.from('kudos').select('*').eq('to_id', uid).order('created_at', { ascending: false }).limit(50),
+    sb.from('encounters').select('id,species_id,source,created_at').eq('player_id', uid).eq('caught', false).order('created_at'),
+    sb.from('events').select('id,title,description,place,starts_at,xp').gte('starts_at', new Date(Date.now() - 12 * 3600e3).toISOString()).order('starts_at').limit(30)
   ]);
-  for (const r of [home, quests, comps, cards, myCards, players, inbox]) if (r.error) { toast(errMsg(r.error)); }
-  S.home = home.data; S.quests = quests.data || []; S.comps = comps.data || []; S.cards = cards.data || [];
-  S.myCards = myCards.data || []; S.players = players.data || []; S.inbox = inbox.data || [];
+  const err = res.find(r => r.error); if (err) toast(errMsg(err.error));
+  [S.home, S.quests, S.spots, S.species, S.dex, S.sparks, S.acts, S.players, S.meets, S.inbox, S.pending, S.events] = res.map(r => r.data || []);
+  if (Array.isArray(S.home)) S.home = null;
   S.me = S.players.find(p => p.id === uid) || S.me;
 }
 
-/* ---------- join ---------- */
-function renderJoin() {
-  $('#nav').hidden = true;
-  let av = AVATARS[Math.floor(Math.random() * AVATARS.length)];
-  const hasRef = !!lsGet('ref');
-  $('#app').innerHTML = `
-  <div style="padding-top:6vh" class="center"><div class="flame">🕯️</div>
-    <h1 style="font-size:34px">Light the Ward</h1>
-    <p class="muted" style="margin:6px 0 22px">Weekly missions, side quests & collectible cards for the Sheboygan Ward YSAs. Quiet or outgoing — there's a quest for you.</p></div>
-  ${hasRef ? `<div class="panel center small">🐑 A friend invited you — welcome!</div>` : ''}
-  <div class="panel">
-    <div class="label" style="margin-top:0">Your name</div>
-    <input id="jName" maxlength="40" placeholder="First name is perfect" autocomplete="given-name">
-    <div class="label">Pick an avatar</div>
-    <div class="avpick" id="jAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}">${a}</button>`).join('')}</div>
-    <div class="label">Ward code</div>
-    <input id="jCode" placeholder="Ask a YSA leader" autocapitalize="characters">
-    <div style="height:14px"></div>
-    <button class="btn" id="jGo">Join the team</button>
-  </div>
-  <p class="center small muted">Played before on another phone? <a href="#" id="jEmail">Sign in with email</a></p>`;
-  $('#jAv').onclick = e => { const b = e.target.closest('button'); if (!b) return; av = b.dataset.a; [...$('#jAv').children].forEach(x => x.classList.toggle('on', x === b)); };
-  $('#jEmail').onclick = e => { e.preventDefault(); emailSignInSheet(); };
-  $('#jGo').onclick = async () => {
-    const name = $('#jName').value.trim(), code = $('#jCode').value.trim();
-    if (!name) return toast('Add your name');
-    if (!code) return toast('Add the ward code');
-    const btn = $('#jGo'); btn.disabled = true; btn.textContent = 'Joining…';
+async function refresh() {
+  await loadAll();
+  drawSpots(); renderHUD(); renderDock(); navBadges();
+  if (S.tab !== 'map') renderPage();
+}
+
+/* ---------- join / sign in (no email) ---------- */
+const USER_RE = /^[a-z0-9_.]{3,20}$/, PIN_RE = /^[0-9]{4,6}$/;
+function renderJoin(mode) {
+  $('#splash')?.remove();
+  document.body.querySelector('.join')?.remove();
+  ['#nav', '#hud', '#mapdock', '#page'].forEach(s => $(s).hidden = true);
+  const invite = lsGet('meet') || '';
+  mode = mode || 'new';
+  let av = AVATARS[Math.floor(Math.random() * AVATARS.length)], starter = 1;
+  const el = document.createElement('div'); el.className = 'join';
+  el.style.cssText = 'position:fixed;inset:0;overflow:auto;z-index:50';
+  el.innerHTML = `<div class="wrap">
+    <div class="center" style="color:#fff">
+      <div style="width:104px;height:104px;margin:0 auto">${lumiSVG('glim', 2)}</div>
+      <h1 style="font-size:40px;margin-top:2px">Lumins</h1>
+      <p style="margin:4px 0 16px;opacity:.92;font-weight:700">Explore Sheboygan. Catch Lumins. Find your people.</p>
+    </div>
+    <div class="panel" style="box-shadow:var(--shadow)">
+      <div class="row" style="background:var(--paper);border-radius:14px;padding:4px;margin-bottom:14px">
+        <button class="chip grow ${mode === 'new' ? 'on' : ''}" style="justify-content:center;border:0" data-mode="new">I'm new</button>
+        <button class="chip grow ${mode === 'back' ? 'on' : ''}" style="justify-content:center;border:0" data-mode="back">I've played before</button>
+      </div>
+      ${mode === 'new' ? `
+        ${invite ? `<div class="center b" style="background:#FFF5D6;border-radius:12px;padding:9px;margin-bottom:12px">🤝 A friend invited you — you'll link up automatically!</div>` : ''}
+        <div class="label" style="margin-top:0">Pick your first Lumin</div>
+        <div class="starter" id="jSt">${[[1, 'glim', 'Glim'], [4, 'seed', 'Seedle'], [7, 'drip', 'Driplet']].map(([id, L, nm]) => `<button data-s="${id}" class="${id === 1 ? 'on' : ''}"><div class="art">${lumiSVG(L, 1)}</div><div class="f" style="font-size:15px">${nm}</div><div class="tiny b" style="color:${LINES[L].c[1]}">${LINES[L].virtue.toUpperCase()}</div></button>`).join('')}</div>
+        <div class="label">Your first name</div>
+        <input id="jName" maxlength="40" placeholder="What friends call you" autocomplete="given-name">
+        <div class="label">Pick a username & PIN <span style="text-transform:none;letter-spacing:0;font-family:Nunito">— to sign back in on any phone</span></div>
+        <div class="row"><input id="jUser" maxlength="20" placeholder="username" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username"><input id="jPin" maxlength="6" inputmode="numeric" pattern="[0-9]*" type="password" placeholder="PIN" autocomplete="new-password" style="width:42%"></div>
+        <div class="tiny muted b" style="margin-top:5px">PIN is 4–6 digits. Screenshot it or save it in your passwords — no email needed.</div>
+        <div class="label">Avatar</div>
+        <div class="avpick" id="jAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}">${a}</button>`).join('')}</div>
+        <div class="label">Game code or a friend's code</div>
+        <input id="jCode" value="${esc(invite)}" placeholder="Ask whoever invited you" autocapitalize="characters" style="text-transform:uppercase;font-weight:800;letter-spacing:.08em">
+        <div style="height:16px"></div>
+        <button class="btn" id="jGo">Let's go!</button>`
+      : `
+        <div class="label" style="margin-top:0">Username</div>
+        <input id="lUser" maxlength="20" placeholder="username" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username">
+        <div class="label">PIN</div>
+        <input id="lPin" maxlength="6" inputmode="numeric" pattern="[0-9]*" type="password" placeholder="••••" autocomplete="current-password">
+        <div style="height:16px"></div>
+        <button class="btn" id="lGo">Sign in</button>
+        <div class="label">Forgot your PIN or got a sign-in code?</div>
+        <div class="small muted" style="margin:-4px 0 8px">On your old phone: Me → Move to a new phone. Or ask a leader for a one-time code.</div>
+        <div class="row"><input id="rCode" maxlength="9" placeholder="ABCD-EFGH" autocapitalize="characters" style="text-transform:uppercase;font-weight:800;letter-spacing:.1em"><button class="btn sm gold" id="rGo">Use code</button></div>`}
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  el.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => renderJoin(b.dataset.mode));
+  const enter = async (btn, label, fn) => {
+    btn.disabled = true; btn.textContent = 'One sec…';
+    try { await ensureSession(); await fn(); el.remove(); await boot(); }
+    catch (e) { toast(errMsg(e), 3800); btn.disabled = false; btn.textContent = label; }
+  };
+  if (mode === 'new') {
+    $('#jSt').onclick = e => { const b = e.target.closest('[data-s]'); if (!b) return; starter = +b.dataset.s; [...$('#jSt').children].forEach(x => x.classList.toggle('on', x === b)); };
+    $('#jAv').onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; av = b.dataset.a; [...$('#jAv').children].forEach(x => x.classList.toggle('on', x === b)); };
+    $('#jUser').oninput = e => { e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''); };
+    $('#jGo').onclick = () => {
+      const name = $('#jName').value.trim(), user = $('#jUser').value.trim(), pin = $('#jPin').value.trim(), code = $('#jCode').value.trim();
+      if (!name) return toast('Add your first name');
+      if (!USER_RE.test(user)) return toast('Username: 3–20 letters, numbers, dots or underscores');
+      if (!PIN_RE.test(pin)) return toast('PIN must be 4–6 digits');
+      if (!code) return toast('Add the game code or a friend\'s code');
+      enter($('#jGo'), "Let's go!", async () => {
+        const { error } = await sb.rpc('join_ward', { p_code: code, p_name: name, p_username: user, p_pin: pin, p_avatar: av, p_starter: starter, p_inviter: invite || null });
+        if (error) throw error;
+        lsSet('meet', ''); confetti();
+        setTimeout(() => toast(`Welcome, ${name}! Tap a pin on the map to explore 🗺️`, 4000), 600);
+      });
+    };
+  } else {
+    $('#lGo').onclick = () => {
+      const user = $('#lUser').value.trim(), pin = $('#lPin').value.trim();
+      if (!user || !pin) return toast('Enter your username and PIN');
+      enter($('#lGo'), 'Sign in', async () => {
+        const { data, error } = await sb.rpc('login', { p_username: user, p_pin: pin });
+        if (error) throw error;
+        if (!data.ok) throw new Error(data.error);
+        setTimeout(() => toast(`Welcome back, ${data.name}! 👋`, 3000), 600);
+      });
+    };
+    $('#rGo').onclick = () => {
+      const code = $('#rCode').value.trim(); if (!code) return toast('Enter the code');
+      enter($('#rGo'), 'Use code', async () => {
+        const { data, error } = await sb.rpc('redeem_code', { p_code: code });
+        if (error) throw error;
+        setTimeout(() => toast(`Welcome back, ${data.name}! Set a new PIN under Me 🔒`, 4200), 600);
+      });
+    };
+  }
+}
+
+/* ---------- navigation ---------- */
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => go(b.dataset.tab));
+function go(tab) {
+  S.tab = tab;
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const onMap = tab === 'map';
+  $('#page').hidden = onMap; $('#hud').hidden = !onMap; $('#mapdock').hidden = !onMap;
+  if (onMap) { renderHUD(); renderDock(); setTimeout(() => S.map && S.map.invalidateSize(), 50); }
+  else { renderPage(); $('#page').scrollTop = 0; }
+  navBadges();
+}
+function renderPage() { ({ quests: renderQuests, crew: renderCrew, dex: renderDex, me: renderMe })[S.tab](); }
+function navBadges() {
+  const set = (tab, n) => { const b = document.querySelector(`nav [data-tab="${tab}"]`); b.querySelector('em')?.remove(); if (n) b.insertAdjacentHTML('beforeend', `<em>${n}</em>`); };
+  set('map', S.pending.length);
+  set('crew', S.inbox.filter(k => !k.seen).length);
+  set('dex', S.species.filter(s => s.stage < 3 && owned(s.id) && sparksFor(s.line) >= growCost(s)).length ? '↑' : 0);
+}
+
+/* ---------- map ---------- */
+function initMap() {
+  if (S.map) { drawSpots(); return; }
+  const c = (S.home && S.home.center) || [43.7508, -87.7145];
+  S.map = L.map('map', { zoomControl: false, attributionControl: true }).setView(c, 14);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>', subdomains: 'abcd', maxZoom: 20
+  }).addTo(S.map);
+  S.layer = L.layerGroup().addTo(S.map);
+  S.map.on('click', e => { if (S.addSpot) addSpotSheet(e.latlng); });
+  drawSpots();
+}
+function drawSpots() {
+  if (!S.layer) return;
+  S.layer.clearLayers();
+  const visited = new Set((S.home && S.home.visited) || []);
+  S.spots.filter(s => s.is_active).forEach(s => {
+    const k = KINDS[s.kind] || KINDS.gather;
+    const icon = L.divIcon({ className: '', html: `<div class="pin ${visited.has(s.id) ? 'done' : ''}" style="--kc:${k.c}"><span>${esc(s.icon)}</span></div>`, iconSize: [46, 46], iconAnchor: [4, 46] });
+    L.marker([s.lat, s.lng], { icon }).addTo(S.layer).on('click', () => spotSheet(s));
+  });
+}
+function startWatch() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(p => {
+    S.pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy };
+    if (!S.map) return;
+    if (!S.meMarker) S.meMarker = L.marker([S.pos.lat, S.pos.lng], { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [22, 22], iconAnchor: [11, 11] }), zIndexOffset: 1000 }).addTo(S.map);
+    else S.meMarker.setLatLng([S.pos.lat, S.pos.lng]);
+  }, () => {}, { enableHighAccuracy: true, maximumAge: 10000 });
+}
+function getPos() {
+  return new Promise((res, rej) => {
+    if (!navigator.geolocation) return rej(new Error('Location isn\'t available on this device'));
+    navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      e => rej(new Error(e.code === 1 ? 'Turn on location for this site to check in' : 'Couldn\'t find you — try again outside')),
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 });
+  });
+}
+function renderHUD() {
+  if (!S.home || !S.me) return;
+  const L2 = levelInfo(S.me.xp), b = S.home.beacon || { goal: 40 }, pct = Math.min(100, Math.round(S.home.light / b.goal * 100));
+  $('#hud').innerHTML = `
+    <button class="hudcard" onclick="go('me')"><div class="ava s">${esc(S.me.avatar)}</div><div style="text-align:left"><div class="lvchip">LV ${L2.lv} · ${L2.title.toUpperCase()}</div><div class="bar blue" style="width:92px;height:6px;margin-top:3px"><i style="width:${L2.pct}%"></i></div></div></button>
+    <button class="beaconpill" id="hudBeacon">🔥 <span>${S.home.light}/${b.goal}</span><div class="bar"><i style="width:${pct}%"></i></div></button>`;
+  $('#hudBeacon').onclick = beaconSheet;
+}
+function renderDock() {
+  if (!S.home) return;
+  const n = S.pending.length, first = n && species(S.pending[0].species_id);
+  const todayEv = S.events.filter(e => Math.abs(new Date(e.starts_at) - Date.now()) < 12 * 3600e3).length;
+  $('#mapdock').innerHTML = `
+    ${S.addSpot ? `<div class="leaderbanner">Tap the map where the new spot goes · <u id="cancelAdd">cancel</u></div>` : ''}
+    <div class="fabs">
+      ${S.me.is_leader ? `<button class="fab ${S.addSpot ? 'on' : ''}" id="fAdd" title="Add spot">➕</button>` : ''}
+      <button class="fab" id="fEv" title="Happenings">📅${todayEv ? `<em>${todayEv}</em>` : ''}</button>
+      <button class="fab" id="fMeet" title="Link up">🤝</button>
+      <button class="fab" id="fLoc" title="Find me">🎯</button>
+    </div>
+    ${n ? `<button class="waiting" id="fWait"><div class="mini">${spSVG(first)}</div><div style="text-align:left">${n === 1 ? 'A Lumin is waiting!' : n + ' Lumins are waiting!'}<div class="small" style="font-family:Nunito;font-weight:800;opacity:.75">Tap to catch</div></div></button>` : ''}`;
+  $('#fEv').onclick = eventsSheet;
+  $('#fMeet').onclick = meetSheet;
+  $('#fLoc').onclick = async () => { try { const p = S.pos || await getPos(); S.map.setView([p.lat, p.lng], 16); } catch (e) { toast(errMsg(e)); } };
+  if ($('#fAdd')) $('#fAdd').onclick = () => { S.addSpot = !S.addSpot; renderDock(); };
+  if ($('#cancelAdd')) $('#cancelAdd').onclick = () => { S.addSpot = false; renderDock(); };
+  if ($('#fWait')) $('#fWait').onclick = catchNext;
+}
+
+function spotSheet(s) {
+  const k = KINDS[s.kind] || KINDS.gather;
+  const done = ((S.home && S.home.visited) || []).includes(s.id);
+  const ever = S.acts.some(a => a.kind === 'visit' && a.ref_id === s.id);
+  const d = S.pos ? distM(S.pos, s) : null;
+  openSheet(`
+    <div class="row"><div style="width:60px;height:60px;border-radius:18px;background:${k.c}22;display:grid;place-items:center;font-size:32px">${esc(s.icon)}</div>
+      <div class="grow"><div class="tiny b" style="color:${k.c};letter-spacing:.08em">${k.n.toUpperCase()}</div><h2 style="font-size:23px">${esc(s.name)}</h2>
+      <div class="small muted">${d != null ? fmtDist(d) + ' away' : 'Location off'}${ever ? '' : ' · <b style="color:var(--coral)">New spot! +25 bonus</b>'}</div></div></div>
+    <p class="muted">${esc(s.description)}</p>
+    <div class="panel" style="background:var(--paper);box-shadow:none;padding:12px"><div class="small"><b>Check in here</b> for +${ever ? 15 : 40} XP and a Lumin. ${s.kind === 'lake' ? 'Water-type Lumins love the lakeshore.' : s.kind === 'quiet' ? 'Quiet spots attract rare, peaceful Lumins.' : s.kind === 'park' ? 'Leafy and feathery Lumins hang out in parks.' : 'Busy places attract friendly Lumins.'}</div></div>
+    ${done ? `<div class="btn ghost center">✓ Checked in today — back tomorrow</div>` : `<button class="btn" id="ciGo">📍 I'm here — check in</button>`}
+    <a class="btn ghost" style="margin-top:10px;text-decoration:none;text-align:center" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}">Directions</a>
+    ${S.me.is_leader ? `<button class="btn ghost sm" style="margin-top:12px" id="spHide">Hide this spot</button>` : ''}`);
+  if ($('#ciGo')) $('#ciGo').onclick = async () => {
+    const btn = $('#ciGo'); btn.disabled = true; btn.textContent = 'Finding you…';
     try {
-      let { data: { session } } = await sb.auth.getSession();
-      if (!session) { const r = await sb.auth.signInAnonymously(); if (r.error) throw r.error; session = r.data.session; }
-      const ref = lsGet('ref');
-      const { error } = await sb.rpc('join_ward', { p_code: code, p_name: name, p_avatar: av, p_ref: isUuid(ref) ? ref : null });
+      const p = await getPos();
+      const { data, error } = await sb.rpc('visit_spot', { p_spot: s.id, p_lat: p.lat, p_lng: p.lng });
       if (error) throw error;
-      lsSet('ref', '');
-      confetti();
-      await boot();
-      setTimeout(() => toast('Welcome to the team, ' + name + '! 🕯️'), 300);
-    } catch (e) { toast(errMsg(e)); btn.disabled = false; btn.textContent = 'Join the team'; }
+      closeSheet();
+      toast(`+${data.xp} XP${data.first ? ' · First visit bonus!' : ''}`);
+      await refresh();
+      startCatch(data.encounter);
+    } catch (e) { toast(errMsg(e), 3800); btn.disabled = false; btn.textContent = "📍 I'm here — check in"; }
   };
-}
-
-function emailSignInSheet() {
-  openSheet(`<h2>Sign in with email</h2><p class="muted small">Only works if you saved your progress with an email before. We'll send a sign-in link.</p>
-  <input id="eAddr" type="email" placeholder="you@email.com"><div style="height:12px"></div>
-  <button class="btn" id="eGo">Send link</button>`);
-  $('#eGo').onclick = async () => {
-    const email = $('#eAddr').value.trim(); if (!email) return;
-    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: false } });
+  if ($('#spHide')) $('#spHide').onclick = async () => {
+    const { error } = await sb.from('spots').update({ is_active: false }).eq('id', s.id);
     if (error) return toast(errMsg(error));
-    closeSheet(); toast('Check your email for the link 📬', 4000);
+    closeSheet(); toast('Spot hidden'); refresh();
   };
 }
 
-/* ---------- derived ---------- */
-function streak() {
-  const weeks = new Set(S.comps.map(c => weekStart(localDate(c.created_at))));
-  let w = weekStart(S.home.today); if (!weeks.has(w)) w = shiftWeek(w, -1);
-  let n = 0; while (weeks.has(w)) { n++; w = shiftWeek(w, -1); } return n;
+function addSpotSheet(ll) {
+  openSheet(`<h2>New spot</h2><p class="small muted">${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}</p>
+    <div class="row"><input id="nsIcon" value="📍" style="width:66px;text-align:center"><input id="nsName" placeholder="Spot name (e.g. The church building)"></div><div style="height:8px"></div>
+    <select id="nsKind">${Object.entries(KINDS).map(([k, v]) => `<option value="${k}">${v.n}</option>`).join('')}</select><div style="height:8px"></div>
+    <textarea id="nsDesc" placeholder="Short description"></textarea><div style="height:12px"></div>
+    <button class="btn" id="nsGo">Add spot</button>`);
+  $('#nsGo').onclick = async () => {
+    const name = $('#nsName').value.trim(); if (!name) return toast('Name it first');
+    const { error } = await sb.from('spots').insert({ name, icon: $('#nsIcon').value.trim() || '📍', kind: $('#nsKind').value, description: $('#nsDesc').value.trim(), lat: ll.lat, lng: ll.lng });
+    if (error) return toast(errMsg(error));
+    S.addSpot = false; closeSheet(); toast('Spot added 📍'); refresh();
+  };
 }
+
+function beaconSheet() {
+  const h = S.home, b = h.beacon || { goal: 40, title: 'Light the Beacon', reward: '' }, pct = Math.min(100, Math.round(h.light / b.goal * 100));
+  openSheet(`<div class="center"><div style="font-size:54px">🔥</div><h2 style="font-size:26px">${esc(b.title)}</h2>
+    <p class="muted" style="margin:4px 0 14px">Everything anyone does this week — a check-in, a quest, a hunt find, a new friend — adds light. Fill it together.</p></div>
+    <div class="bar big"><i style="width:${pct}%"></i></div>
+    <div class="row between small" style="margin-top:6px"><b>${h.light} / ${b.goal}</b><span class="muted">${h.heroes} player${h.heroes === 1 ? '' : 's'} helping</span></div>
+    ${b.reward ? `<div class="panel" style="background:#FFF5D6;box-shadow:none;margin-top:14px"><b>🎁 Reward:</b> ${esc(b.reward)}</div>` : ''}
+    ${h.light >= b.goal ? `<div class="center f" style="font-size:20px;color:var(--green);margin-top:10px">🎉 The beacon is lit!</div>` : ''}
+    <div class="label">Brightest this week</div>
+    ${(h.board || []).length ? h.board.map((p, i) => `<div class="listrow"><span class="rank">${i + 1}</span><div class="ava s">${esc(p.avatar)}</div><b class="grow">${esc(p.display_name)}</b><span class="f" style="color:var(--blue)">${p.wxp} XP</span></div>`).join('') : '<div class="empty">Nobody yet — be first!</div>'}`);
+}
+
+/* ---------- link up (in-person meet) ---------- */
+function meetSheet() {
+  const code = S.home.my_code;
+  openSheet(`<div class="center"><h2 style="font-size:24px">Link up 🤝</h2>
+    <p class="muted small" style="margin:4px 0 14px">With someone in person, have them scan this with their phone camera. It works even if they haven't joined yet — that invites them!</p></div>
+    <div class="qrbox" id="qr"></div>
+    <div class="code" style="margin-top:12px">${esc(code)}</div>
+    <div class="label">Or type their code</div>
+    <div class="row"><input id="mCode" maxlength="5" placeholder="ABCDE" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.15em;font-weight:800"><button class="btn sm" id="mGo">Link</button></div>
+    <p class="small muted center" style="margin-top:12px">New friend: +40 XP · Hanging out again on another day: +15 XP & friendship grows</p>`);
+  try { new QRCode($('#qr'), { text: meetUrl(code), width: 200, height: 200, colorDark: '#1C2340', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $('#qr').textContent = meetUrl(code); }
+  $('#mGo').onclick = () => { const c = $('#mCode').value.trim().toUpperCase(); if (c.length !== 5) return toast('Codes are 5 characters'); doMeet(c); };
+}
+async function doMeet(code) {
+  const { data, error } = await sb.rpc('meet', { p_code: code });
+  if (error) return toast(errMsg(error), 3500);
+  closeSheet(); confetti(24);
+  toast(data.new ? `New friend: ${data.name}! +${data.xp} XP` : `Day ${data.days} with ${data.name}! +${data.xp} XP`, 3500);
+  await refresh();
+  startCatch(data.encounter);
+}
+async function handlePendingMeet() {
+  const code = lsGet('meet'); if (!code) return;
+  lsSet('meet', '');
+  if (S.home && code === S.home.my_code) return;
+  await doMeet(code);
+}
+
+/* ---------- happenings ---------- */
+async function eventsSheet() {
+  let codes = {};
+  if (S.me.is_leader) { const { data } = await sb.rpc('event_codes'); (data || []).forEach(r => codes[r.id] = r.code); }
+  openSheet(`<h2 style="font-size:24px">📅 Happenings</h2>
+    <p class="small muted" style="margin:4px 0 10px">At an activity? Ask the host for the check-in code — it's worth a rare-ish Lumin.</p>
+    <div class="row"><input id="evCode" maxlength="4" placeholder="CODE" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.2em;font-weight:800"><button class="btn sm coral" id="evGo">Check in</button></div>
+    <div class="label">Coming up</div>
+    ${S.events.length ? S.events.map(e => `<div class="panel" style="background:var(--paper);box-shadow:none;margin-bottom:8px"><div class="row between"><b>${esc(e.title)}</b><span class="small f" style="color:var(--blue)">+${e.xp}</span></div>
+      <div class="small muted">${when(e.starts_at)}${e.place ? ' · ' + esc(e.place) : ''}</div>${e.description ? `<div class="small" style="margin-top:4px">${esc(e.description)}</div>` : ''}
+      ${codes[e.id] ? `<div class="small b" style="margin-top:6px">Code to read aloud: <span class="f" style="color:var(--coral);letter-spacing:.15em">${esc(codes[e.id])}</span></div>` : ''}</div>`).join('') : '<div class="empty">Nothing scheduled yet.</div>'}`);
+  $('#evGo').onclick = async () => {
+    const { data, error } = await sb.rpc('event_checkin', { p_code: $('#evCode').value });
+    if (error) return toast(errMsg(error), 3500);
+    closeSheet(); confetti(20); toast(`Checked in to ${data.title}! +${data.xp} XP`);
+    await refresh(); startCatch(data.encounter);
+  };
+}
+
+/* ---------- catching ---------- */
+function catchNext() { const p = S.pending[0]; if (p) startCatch({ id: p.id, species: species(p.species_id) }); }
+function startCatch(enc) {
+  if (!enc || !enc.species) return;
+  if (!S.pending.some(p => p.id === enc.id)) S.pending.push({ id: enc.id, species_id: enc.species.id });
+  const sp = enc.species, [c1, c2] = LINES[sp.line].c;
+  const el = $('#catch');
+  el.style.setProperty('--cb1', c1); el.style.setProperty('--cb2', c2);
+  el.innerHTML = `
+    <div class="ctop"><span>${sp.stage === 3 ? '🌟 A legendary Lumin appeared!' : sp.stage === 2 ? '✨ A rare Lumin appeared!' : 'A wild Lumin appeared!'}</span><button class="cx" id="cX">✕</button></div>
+    <div style="text-align:center"><div class="cname">${esc(sp.name)}</div><div class="cstars">${'★'.repeat(sp.stage)}${'☆'.repeat(3 - sp.stage)} · ${esc(sp.virtue)}</div></div>
+    <div class="cstage" id="cStage"><div class="cmon" id="cMon">${spSVG(sp)}</div><div class="cring" id="cRing"></div><div class="corb" id="cOrb"></div></div>
+    <div class="cthrow"><button class="btn gold" id="cThrow">Tap when the ring is small!</button><p class="center small b" style="color:#fff;opacity:.85;margin:10px 0 0">Smaller ring = better catch = more sparks</p></div>`;
+  el.classList.add('open');
+  const ring = $('#cRing'); let raf, scale = 1, thrown = false; const t0 = performance.now();
+  const loop = t => { const p = ((t - t0) % 1500) / 1500; scale = 1 - .74 * p; ring.style.transform = `translate(-50%,-50%) scale(${scale})`; ring.style.borderColor = scale < .45 ? '#3BE08A' : scale < .7 ? '#FFD84A' : '#fff'; raf = requestAnimationFrame(loop); };
+  raf = requestAnimationFrame(loop);
+  const close = () => { cancelAnimationFrame(raf); el.classList.remove('open'); el.innerHTML = ''; renderDock(); navBadges(); };
+  $('#cX').onclick = () => { close(); if (!thrown) toast("It'll wait for you on the map ✨"); };
+  const throwIt = async () => {
+    if (thrown) return; thrown = true; cancelAnimationFrame(raf);
+    const q = scale < .45 ? 2 : scale < .7 ? 1 : 0;
+    $('#cThrow').disabled = true; ring.style.opacity = '0';
+    const req = sb.rpc('catch_lumin', { p_enc: enc.id, p_quality: q });
+    $('#cOrb').classList.add('fly');
+    await wait(420); $('#cMon').classList.add('in');
+    $('#cStage').insertAdjacentHTML('beforeend', `<div class="chit">${QUALITY[q]}</div>`);
+    await wait(380); $('#cOrb').classList.add('wob');
+    const [{ data, error }] = await Promise.all([req, wait(1800)]);
+    if (error) { toast(errMsg(error)); S.pending = S.pending.filter(p => p.id !== enc.id); return close(); }
+    $('#cOrb').classList.add('burst'); confetti(sp.stage > 1 ? 50 : 22);
+    S.pending = S.pending.filter(p => p.id !== enc.id);
+    const d = S.dex.find(x => x.species_id === sp.id); if (d) d.qty++; else S.dex.push({ species_id: sp.id, qty: 1 });
+    const k = S.sparks.find(x => x.line === sp.line); if (k) k.qty = data.sparks_total; else S.sparks.push({ line: sp.line, qty: data.sparks_total });
+    S.me.xp += data.xp;
+    await wait(300);
+    const more = S.pending.length;
+    el.querySelector('.cthrow').remove(); $('#cStage').remove();
+    el.insertAdjacentHTML('beforeend', `<div class="result"><div class="art">${spSVG(sp)}</div>
+      ${data.new ? '<div class="newtag">NEW! Added to your Lumidex</div>' : ''}
+      <h2 style="font-size:26px">${esc(sp.name)} caught!</h2>
+      <div class="virtue" style="--lc:${c2};margin:2px 0 8px">${esc(sp.virtue)}</div>
+      <p class="muted" style="margin:0 0 12px;font-style:italic">“${esc(sp.flavor)}”</p>
+      <div class="row" style="justify-content:center;gap:8px;margin-bottom:14px"><span class="sparkpill">+${data.sparks} ✦ sparks</span><span class="sparkpill" style="background:#EAF2FF;color:var(--blue)">+${data.xp} XP</span></div>
+      ${more ? `<button class="btn gold" id="cNext">Next Lumin (${more} waiting)</button><div style="height:8px"></div>` : ''}
+      <button class="btn ${more ? 'ghost' : ''}" id="cDone">${more ? 'Later' : 'Awesome!'}</button></div>`);
+    $('#cDone').onclick = () => { close(); if (S.tab !== 'map') renderPage(); else renderHUD(); };
+    if ($('#cNext')) $('#cNext').onclick = () => { close(); catchNext(); };
+  };
+  $('#cThrow').onclick = throwIt; $('#cStage').onclick = throwIt;
+}
+
+/* ---------- photos ---------- */
+function compress(file, max = 1280) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      let w = im.naturalWidth, h = im.naturalHeight; const k = Math.min(1, max / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h); URL.revokeObjectURL(url);
+      c.toBlob(b => b ? res(b) : rej(new Error('Could not read that photo')), 'image/jpeg', .82);
+    };
+    im.onerror = () => rej(new Error('Could not read that photo'));
+    im.src = url;
+  });
+}
+async function uploadPhoto(file) {
+  const blob = await compress(file);
+  const path = `${S.uid}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.jpg`;
+  const { error } = await sb.storage.from('ysa-photos').upload(path, blob, { contentType: 'image/jpeg' });
+  if (error) throw error;
+  return path;
+}
+function photoPicker(id) {
+  return `<label class="photopick" id="${id}L"><input type="file" accept="image/*" id="${id}" hidden><img alt=""><span class="small b">📷 Add a photo <span class="muted">(optional)</span></span></label>`;
+}
+function bindPhoto(id) {
+  const inp = $('#' + id); if (!inp) return;
+  inp.onchange = () => { const f = inp.files[0]; if (!f) return; const lab = $('#' + id + 'L'); lab.classList.add('has'); lab.querySelector('img').src = URL.createObjectURL(f); lab.querySelector('span').innerHTML = 'Photo ready ✓ <span class="muted">(tap to change)</span>'; };
+}
+const urlCache = {};
+async function fillPhotos(root) {
+  const imgs = [...root.querySelectorAll('img[data-path]')]; if (!imgs.length) return;
+  const need = [...new Set(imgs.map(i => i.dataset.path).filter(p => !urlCache[p]))];
+  if (need.length) { const { data } = await sb.storage.from('ysa-photos').createSignedUrls(need, 3600); (data || []).forEach(d => { if (d.signedUrl) urlCache[d.path] = d.signedUrl; }); }
+  imgs.forEach(i => { if (urlCache[i.dataset.path]) i.src = urlCache[i.dataset.path]; });
+}
+
+/* ---------- quests ---------- */
 function questStatus(q) {
   if (!q.cooldown_days) return { ok: true };
-  const last = S.comps.find(c => c.quest_id === q.id); if (!last) return { ok: true };
-  const left = q.cooldown_days - daysBetween(localDate(last.created_at), S.home.today);
+  const last = S.acts.find(a => a.kind === 'quest' && a.ref_id === q.id); if (!last) return { ok: true };
+  const left = q.cooldown_days - (dnum(S.home.today) - dnum(localDate(last.created_at)));
   return left > 0 ? { ok: false, left } : { ok: true };
 }
-function isSide(q) { return (S.home.sides || []).includes(q.id); }
-function weekXP() { const ws = weekStart(S.home.today); return S.comps.filter(c => weekStart(localDate(c.created_at)) === ws).reduce((a, c) => a + c.xp, 0); }
-function unseen() { return S.inbox.filter(k => !k.seen).length; }
-
-function badges() {
-  const c = S.comps, byTier = t => c.filter(x => x.tier === t).length;
-  const owned = new Set(S.myCards.map(x => x.card_id));
-  const legend = S.cards.some(k => k.rarity === 'legendary' && owned.has(k.id));
-  const has = s => c.some(x => (x.quest_title || '').toLowerCase().includes(s));
-  return [
-    { e: '👣', n: 'First Step', on: c.length >= 1, how: 'Complete any quest' },
-    { e: '🌱', n: 'Quiet Strength', on: byTier(1) >= 10, how: '10 Quiet quests' },
-    { e: '💬', n: 'Reacher', on: byTier(2) >= 10, how: '10 Reach Out quests' },
-    { e: '🤝', n: 'Companion', on: byTier(3) >= 5, how: '5 Together quests' },
-    { e: '🔥', n: 'Gatherer', on: byTier(4) >= 5, how: '5 Gather quests' },
-    { e: '🍽️', n: 'Table Guest', on: has('family for a meal'), how: 'Join a ward family for a meal' },
-    { e: '🛠️', n: 'JustServe', on: has('justserve'), how: 'Do a JustServe project' },
-    { e: '🐑', n: 'Shepherd', on: has('recruited'), how: 'Invite someone who joins' },
-    { e: '👯', n: 'Duo', on: c.filter(x => x.partner_id).length >= 5, how: '5 quests with a teammate' },
-    { e: '📅', n: 'Steady', on: streak() >= 4, how: '4-week streak' },
-    { e: '🃏', n: 'Collector', on: owned.size >= 12, how: '12 different cards' },
-    { e: '👑', n: 'Legend', on: legend, how: 'Draw a legendary card' }
-  ];
-}
-
-/* ---------- render ---------- */
-function render() {
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
-  ({ home: renderHome, quests: renderQuests, ward: renderWard, cards: renderCards, me: renderMe })[S.tab]();
-  window.scrollTo(0, 0);
-}
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
-
+function isDaily(q) { return (S.home.daily || []).includes(q.id); }
 function questRow(q) {
-  const st = questStatus(q), side = isSide(q);
-  const xp = q.xp + (side ? Math.floor(q.xp / 2) : 0);
-  return `<button class="quest t${q.tier} ${st.ok ? '' : 'cool'}" data-q="${q.id}">
-    <div class="ic">${esc(q.icon)}</div>
-    <div style="min-width:0"><div class="tt">${esc(q.title)}${side ? '<span class="bonus">SIDE +50%</span>' : ''}</div>
-      <div class="ds">${st.ok ? esc(q.description) : `✓ Done — back in ${st.left} day${st.left > 1 ? 's' : ''}`}</div></div>
-    <div class="xp">+${xp}<small>${TIERS[q.tier].emoji} ${TIERS[q.tier].name}</small></div></button>`;
+  const st = questStatus(q), d = isDaily(q), xp = q.xp + (d ? Math.floor(q.xp / 2) : 0);
+  return `<button class="quest p${q.path} ${st.ok ? '' : 'cool'}" data-q="${q.id}">
+    <div class="qic">${esc(q.icon)}</div>
+    <div class="grow"><div class="qt">${esc(q.title)}${d ? '<span class="bonus">DAILY +50%</span>' : ''}</div>
+    <div class="qd">${st.ok ? esc(q.description) : `✓ Done · back in ${st.left} day${st.left > 1 ? 's' : ''}`}</div></div>
+    <div class="qxp">+${xp}<small>${'<span class="dot on"></span>'.repeat(q.energy)}${'<span class="dot"></span>'.repeat(3 - q.energy)}</small></div></button>`;
 }
 function bindQuests(root) { root.querySelectorAll('[data-q]').forEach(b => b.onclick = () => openQuest(b.dataset.q)); }
 
-function renderHome() {
-  const me = S.me, L = levelInfo(me.xp), h = S.home, m = h.mission;
-  const pct = Math.min(100, Math.round(h.progress / m.goal * 100));
-  const sides = (h.sides || []).map(id => S.quests.find(q => q.id === id)).filter(Boolean);
-  const others = S.players.filter(p => p.id !== S.uid);
-  const pick = others.sort(() => Math.random() - .5).slice(0, 3);
-  const n = unseen();
-  $('#app').innerHTML = `
-  <div class="hero">
-    <div class="ava">${esc(me.avatar)}</div>
-    <div style="flex:1;min-width:0">
-      <div class="lv">LEVEL ${L.lv} · ${L.title.toUpperCase()}</div>
-      <h2 style="font-size:22px">${esc(me.display_name)}</h2>
-      <div class="bar" style="margin-top:6px"><i style="width:${L.pct}%"></i></div>
-      <div class="small muted" style="margin-top:3px">${L.toNext} XP to level ${L.lv + 1}</div>
-    </div>
-    <button class="bell" id="bell">🔔${n ? `<em>${n}</em>` : ''}</button>
-  </div>
-  <div class="stats">
-    <div class="stat"><b>${streak()}🔥</b><span>week streak</span></div>
-    <div class="stat"><b>${weekXP()}</b><span>XP this week</span></div>
-    <div class="stat"><b>${new Set(S.myCards.map(c => c.card_id)).size}/${S.cards.length}</b><span>cards</span></div>
-  </div>
-  <div class="panel mission">
-    <div class="small" style="color:var(--gold);font-weight:800">⚔️ THIS WEEK'S WARD MISSION</div>
-    <h2>${esc(m.title)}</h2>
-    <p class="muted small" style="margin:0 0 12px">${esc(m.description)}</p>
-    <div class="bar big"><i style="width:${pct}%"></i></div>
-    <div class="row between small" style="margin-top:6px"><b>${h.progress} / ${m.goal} quests</b><span class="muted">${h.heroes} teammate${h.heroes === 1 ? '' : 's'} helping</span></div>
-    ${m.reward ? `<div class="small" style="margin-top:8px">🎁 Reward: <b>${esc(m.reward)}</b></div>` : ''}
-    ${h.progress >= m.goal ? `<div class="done-flag">🎉 Mission complete! Keep going for bonus glory.</div>` : ''}
-  </div>
-  <div class="label">✨ Today's side quests · +50% XP</div>
-  <div id="sides">${sides.map(questRow).join('') || '<div class="empty">No side quests today</div>'}</div>
-  ${pick.length ? `<div class="label">💛 Send some love</div>
-  <div class="panel"><div class="small muted" style="margin-bottom:10px">A quick encouragement takes five seconds and can make someone's week.</div>
-  <div class="row wrapf">${pick.map(p => `<button class="chip" data-enc="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</button>`).join('')}</div></div>` : ''}
-  `;
-  bindQuests($('#sides'));
-  $('#bell').onclick = openInbox;
-  document.querySelectorAll('[data-enc]').forEach(b => b.onclick = () => encourage(b.dataset.enc));
-}
-
 function renderQuests() {
-  const allowed = BATTERY[S.battery].tiers;
-  $('#app').innerHTML = `
-  <h1 style="font-size:28px;margin-bottom:4px">Quests</h1>
-  <p class="muted small" style="margin:0 0 12px">Every quest — even the quiet ones — fills the ward mission bar.</p>
-  <div class="panel" style="padding:12px">
-    <div class="small" style="font-weight:800;margin-bottom:8px">How's your social battery today?</div>
-    <div class="row wrapf" id="batt">${Object.entries(BATTERY).map(([k, v]) => `<button class="chip ${k === S.battery ? 'on' : ''}" data-b="${k}">${v.label}</button>`).join('')}</div>
-  </div>
-  <div id="qlist">${[1, 2, 3, 4].filter(t => allowed.includes(t)).map(t => {
-    const qs = S.quests.filter(q => q.is_active && q.tier === t).sort((a, b) => questStatus(b).ok - questStatus(a).ok);
-    if (!qs.length) return '';
-    return `<div class="tierhead t${t}"><span style="font-size:22px">${TIERS[t].emoji}</span><div><b>${TIERS[t].name}</b><div class="small muted">${TIERS[t].desc}</div></div></div>${qs.map(questRow).join('')}`;
-  }).join('')}</div>
-  ${S.battery !== 'full' ? `<p class="center small muted">Feeling braver? Switch to ⚡ Full to see Gather quests.</p>` : ''}`;
-  $('#batt').onclick = e => { const b = e.target.closest('[data-b]'); if (!b) return; S.battery = b.dataset.b; lsSet('battery', S.battery); renderQuests(); };
-  bindQuests($('#qlist'));
+  const max = BATTERY[S.battery].max;
+  const daily = (S.home.daily || []).map(id => S.quests.find(q => q.id === id)).filter(Boolean);
+  const list = S.quests.filter(q => q.is_active && q.energy <= max && (S.qpath === 'all' || q.path === S.qpath))
+    .sort((a, b) => questStatus(b).ok - questStatus(a).ok || a.energy - b.energy);
+  $('#pageBody').innerHTML = `
+    <div class="pagehead"><h1>Quests</h1></div>
+    <p class="muted small" style="margin:0 0 14px">Every quest earns XP and a Lumin — and adds light to the beacon.</p>
+    <div class="daily"><div class="row between"><div class="f" style="font-size:19px">☀️ Today's three</div><span class="small b" style="opacity:.85">+50% XP</span></div>
+      <div style="height:10px"></div>${daily.map(questRow).join('') || '<div class="small">Check back tomorrow!</div>'}</div>
+    <div class="label">How social are you feeling?</div>
+    <div class="scroller" id="qBat">${Object.entries(BATTERY).map(([k, v]) => `<button class="chip ${k === S.battery ? 'on' : ''}" data-b="${k}">${v.label}</button>`).join('')}</div>
+    <div class="scroller" id="qPath" style="margin-top:6px"><button class="chip ${S.qpath === 'all' ? 'on' : ''}" data-p="all">All</button>${Object.entries(PATHS).map(([k, v]) => `<button class="chip ${S.qpath === k ? 'on' : ''}" data-p="${k}">${v.emoji} ${v.name}</button>`).join('')}</div>
+    <div style="height:10px"></div>
+    <div id="qList">${list.map(questRow).join('') || '<div class="empty">No quests match — try a different filter.</div>'}</div>
+    ${max < 3 ? `<p class="center small muted">Feeling braver? Tap ⚡ for big-group quests.</p>` : ''}`;
+  $('#qBat').onclick = e => { const b = e.target.closest('[data-b]'); if (!b) return; S.battery = b.dataset.b; lsSet('battery', S.battery); renderQuests(); };
+  $('#qPath').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; S.qpath = b.dataset.p; renderQuests(); };
+  bindQuests($('#pageBody'));
 }
 
 function openQuest(id) {
   const q = S.quests.find(x => x.id === id); if (!q) return;
-  const st = questStatus(q), side = isSide(q), xp = q.xp + (side ? Math.floor(q.xp / 2) : 0);
+  const st = questStatus(q), d = isDaily(q), xp = q.xp + (d ? Math.floor(q.xp / 2) : 0);
   const mates = S.players.filter(p => p.id !== S.uid);
+  const crew = new Set((S.home.crew && S.home.crew.members) || []);
+  mates.sort((a, b) => crew.has(b.id) - crew.has(a.id));
   openSheet(`
-    <div class="row" style="gap:12px"><div class="quest t${q.tier}" style="padding:0;border:0;background:none;margin:0;width:auto"><div class="ic" style="width:56px;height:56px;font-size:34px">${esc(q.icon)}</div></div>
-      <div><div class="small" style="font-weight:800;color:var(--t${q.tier})">${TIERS[q.tier].emoji} ${TIERS[q.tier].name.toUpperCase()}${side ? ' · SIDE QUEST' : ''}</div><h2 style="font-size:21px">${esc(q.title)}</h2></div></div>
+    <div class="row p${q.path}"><div class="qic" style="width:58px;height:58px;font-size:32px">${esc(q.icon)}</div>
+      <div class="grow"><div class="tiny b" style="color:var(--pc);letter-spacing:.08em">${PATHS[q.path].emoji} ${PATHS[q.path].name.toUpperCase()} · ${ENERGY[q.energy].toUpperCase()}</div><h2 style="font-size:22px">${esc(q.title)}</h2></div></div>
     <p class="muted">${esc(q.description)}</p>
-    <div class="row small" style="gap:14px;margin-bottom:6px"><b style="color:var(--gold)">+${xp} XP</b><span class="muted">🃏 Card draw</span><span class="muted">${q.cooldown_days === 1 ? 'Daily' : q.cooldown_days === 7 ? 'Weekly' : q.cooldown_days ? 'Every ' + q.cooldown_days + ' days' : 'Repeatable'}</span></div>
+    <div class="row small" style="gap:12px;margin-bottom:4px"><b class="f" style="color:var(--blue);font-size:16px">+${xp} XP</b><span class="muted">✨ Lumin encounter</span><span class="muted">${q.cooldown_days === 1 ? 'Daily' : q.cooldown_days === 7 ? 'Weekly' : q.cooldown_days ? 'Every ' + q.cooldown_days + ' days' : 'Repeatable'}</span></div>
     ${st.ok ? `
-    <div class="label">A thought to share (optional)</div>
-    <textarea id="qNote" maxlength="280" placeholder="${q.tier === 1 ? 'What did you feel or notice?' : 'How did it go?'}"></textarea>
-    ${q.tier >= 2 && mates.length ? `<div class="label">Did it with a teammate? They get half XP too</div>
-    <select id="qPartner"><option value="">— Just me —</option>${mates.map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</option>`).join('')}</select>` : ''}
-    <div class="toggle"><div><b>Share on the Ward Wall</b><div class="small muted">Off = still counts for the mission, just private</div></div><button class="sw ${q.tier === 1 ? '' : 'on'}" id="qPub"></button></div>
-    <button class="btn" id="qGo">I did it! ✨</button>` : `<div class="panel center">✓ You've done this one. It comes back in <b>${st.left} day${st.left > 1 ? 's' : ''}</b>.</div>`}`);
+      <div class="label">Anything to share? (optional)</div>
+      <textarea id="qNote" maxlength="280" placeholder="${q.path === 'reflect' ? 'A thought, a feeling, a question…' : 'How did it go?'}"></textarea>
+      <div style="height:8px"></div>${photoPicker('qPhoto')}
+      ${q.energy > 1 && mates.length ? `<div class="label">Did it with someone? They get half XP</div>
+        <select id="qPartner"><option value="">— Just me —</option>${mates.map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}${crew.has(p.id) ? ' (crew)' : ''}</option>`).join('')}</select>` : ''}
+      <div class="toggle"><div><b>Post to the Campfire</b><div class="small muted">Off = private, still counts</div></div><button class="sw ${q.path === 'reflect' ? '' : 'on'}" id="qPub"></button></div>
+      <button class="btn" id="qGo">Done! ✨</button>`
+      : `<div class="panel center" style="background:var(--paper);box-shadow:none">✓ Done — it comes back in <b>${st.left} day${st.left > 1 ? 's' : ''}</b>.</div>`}`);
   if (!st.ok) return;
-  $('#qPub').onclick = e => e.currentTarget.classList.toggle('on');
+  bindPhoto('qPhoto'); bindSw($('#sheetBody'));
   $('#qGo').onclick = async () => {
-    const btn = $('#qGo'); btn.disabled = true; btn.textContent = 'Recording…';
-    const prevLv = levelInfo(S.me.xp).lv, prevProg = S.home.progress, goal = S.home.mission.goal;
-    const { data, error } = await sb.rpc('complete_quest', {
-      p_quest: q.id, p_note: $('#qNote').value, p_public: $('#qPub').classList.contains('on'),
-      p_partner: ($('#qPartner') && $('#qPartner').value) || null
-    });
-    if (error) { btn.disabled = false; btn.textContent = 'I did it! ✨'; return toast(errMsg(error)); }
-    revealCard(data);
-    await loadAll();
-    const L = levelInfo(S.me.xp);
-    setTimeout(() => {
-      if (L.lv > prevLv) { confetti(40); toast(`⬆️ Level ${L.lv} — ${L.title}!`, 3500); }
-      if (prevProg < goal && S.home.progress >= goal) { confetti(60); toast('🎉 WARD MISSION COMPLETE! 🎉', 4000); }
-    }, 1400);
-    S.feed = null; render();
+    const btn = $('#qGo'); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const f = $('#qPhoto').files[0]; const photo = f ? await uploadPhoto(f) : null;
+      const { data, error } = await sb.rpc('complete_quest', { p_quest: q.id, p_note: $('#qNote').value, p_photo: photo, p_public: $('#qPub').classList.contains('on'), p_partner: ($('#qPartner') && $('#qPartner').value) || null });
+      if (error) throw error;
+      const prev = levelInfo(S.me.xp).lv;
+      closeSheet(); toast(`+${data.xp} XP${data.bonus ? ' · daily bonus!' : ''}${data.partner_xp ? ` · teammate +${data.partner_xp}` : ''}`);
+      S.feed = null; await refresh();
+      if (levelInfo(S.me.xp).lv > prev) { confetti(40); setTimeout(() => toast(`⬆️ Level ${levelInfo(S.me.xp).lv} — ${levelInfo(S.me.xp).title}!`, 3500), 2900); }
+      startCatch(data.encounter);
+    } catch (e) { toast(errMsg(e), 3500); btn.disabled = false; btn.textContent = 'Done! ✨'; }
   };
 }
 
-function cardHTML(c, extra = '', qty = 0) {
-  return `<div class="tcard r-${c.rarity} ${extra}">${qty > 1 ? `<span class="tc-qty">×${qty}</span>` : ''}
-    <div class="tc-name">${esc(c.name)}</div><div class="tc-art">${esc(c.emoji)}</div>
-    <div class="tc-flavor">${esc(c.flavor)}</div>
-    <div class="tc-stats"><span class="l">☀ ${c.light}</span><span class="h">♥ ${c.heart}</span></div></div>`;
+/* ---------- crew ---------- */
+function friends() {
+  const m = {};
+  S.meets.forEach(r => { const o = r.a === S.uid ? r.b : r.a; (m[o] = m[o] || { id: o, days: 0, last: r.met_on }).days++; if (r.met_on > m[o].last) m[o].last = r.met_on; });
+  return Object.values(m).sort((a, b) => b.days - a.days);
 }
+async function renderCrew() {
+  const h = S.home, crew = h.crew || { name: 'Your crew', emoji: '🧭', members: [] };
+  const mates = crew.members.filter(id => id !== S.uid).map(player);
+  const found = h.hunt.filter(x => x.found_by).length, myPts = h.hunt.filter(x => x.found_by).reduce((a, x) => a + x.points, 0);
+  const unseen = S.inbox.filter(k => !k.seen).length, fr = friends();
+  $('#pageBody').innerHTML = `
+    <div class="pagehead"><h1>Crew</h1><button class="bell" id="bell">💌${unseen ? `<em>${unseen}</em>` : ''}</button></div>
+    <p class="muted small" style="margin:0 0 14px">New random crews every Sunday — a chance to get to know someone new.</p>
+    <div class="crewcard" data-emoji="${esc(crew.emoji)}">
+      <div class="small b" style="opacity:.9">THIS WEEK YOU'RE IN</div><h2>${esc(crew.emoji)} ${esc(crew.name)}</h2>
+      <div class="row wrapf" style="margin-top:14px;gap:6px;align-items:flex-start">
+        <div class="member"><div class="ava">${esc(S.me.avatar)}</div><div class="n">You</div></div>
+        ${mates.map(p => `<div class="member"><div class="ava">${esc(p.avatar)}</div><div class="n">${esc(p.display_name)}</div><button data-hi="${p.id}">🙌 Hi</button></div>`).join('')}
+        ${!mates.length ? `<div class="small b" style="opacity:.9;padding-top:12px">Your crewmates show up as more people join. Invite a friend! 🤝</div>` : ''}
+      </div></div>
 
-function revealCard(r) {
-  const c = r.card;
-  openSheet(`
-    <div class="xpbig">+${r.xp} XP</div>
-    <p class="center small muted" style="margin:0 0 16px">${r.bonus ? '✨ Side quest bonus included! ' : ''}${r.partner_xp ? `Your teammate got +${r.partner_xp} XP 🤝` : ''}</p>
-    <div class="flip" id="flip" style="position:relative"><div class="inner">
-      <div class="front">${cardHTML(c, 'big')}</div><div class="back">🕯️</div></div></div>
-    <p class="center" style="margin-top:14px"><span class="rarity tcard r-${c.rarity}" style="all:unset;font-weight:800;color:var(--${c.rarity});letter-spacing:.1em;font-size:13px">${RAR[c.rarity].toUpperCase()}</span>
-    ${r.new_card ? ' · <b style="color:var(--t1)">NEW CARD!</b>' : ' · duplicate'}</p>
-    <button class="btn" onclick="closeSheet()">Keep going</button>`);
-  setTimeout(() => { $('#flip').classList.add('go'); if (c.rarity === 'legendary' || c.rarity === 'rare') confetti(c.rarity === 'legendary' ? 50 : 20); }, 350);
-}
+    <div class="label">🔎 Crew scavenger hunt · ${found}/${h.hunt.length} · ${myPts} pts</div>
+    <div class="panel" id="huntList">${h.hunt.map(x => `<button class="hunt ${x.found_by ? 'found' : ''}" data-h="${x.id}">
+        <div class="chk">${x.found_by ? '✓' : esc(x.icon)}</div>
+        <div class="grow"><div class="b ht">${esc(x.title)}</div><div class="small muted">${x.found_by ? 'Found by ' + esc(player(x.found_by).display_name) : esc(x.hint)}</div></div>
+        ${x.photo_path ? `<img class="thumb" data-path="${esc(x.photo_path)}" alt="">` : `<span class="f" style="color:var(--coral)">${x.points}</span>`}</button>`).join('') || '<div class="empty">No hunt this week.</div>'}</div>
 
-async function renderWard() {
-  const h = S.home;
-  $('#app').innerHTML = `
-  <h1 style="font-size:28px;margin-bottom:12px">${esc(h.ward_name)}</h1>
-  <div class="label" style="margin-top:0">🌟 Lights of the week</div>
-  <div class="panel">${(h.board || []).length ? h.board.map((b, i) => `<div class="boardrow"><span class="rank">${i + 1}</span><div class="ava s">${esc(b.avatar)}</div><b style="flex:1">${esc(b.display_name)}</b><span class="small" style="color:var(--gold);font-weight:800">${b.wxp} XP</span></div>`).join('') : '<div class="empty">No one yet this week — be the first light!</div>'}</div>
-  <div class="label">📣 Ward Wall</div>
-  <div class="panel" id="feed"><div class="empty">Loading…</div></div>
-  <div class="label">👥 Team (${S.players.length})</div>
-  <div class="panel">${S.players.map(p => `<div class="boardrow"><div class="ava s">${esc(p.avatar)}</div><div style="flex:1"><b>${esc(p.display_name)}</b>${p.is_leader ? ' <span class="small" style="color:var(--gold)">★ leader</span>' : ''}<div class="small muted">Level ${levelInfo(p.xp).lv} · ${levelInfo(p.xp).title}</div></div>${p.id !== S.uid ? `<button class="btn ghost sm" data-enc="${p.id}">💛</button>` : ''}</div>`).join('')}</div>`;
-  document.querySelectorAll('[data-enc]').forEach(b => b.onclick = () => encourage(b.dataset.enc));
+    <div class="label">🏆 Crew standings</div>
+    <div class="panel">${h.standings.map((c, i) => `<div class="listrow"><span class="rank">${i + 1}</span><span style="font-size:22px">${esc(c.emoji)}</span><b class="grow" style="${crew.id === c.id ? 'color:var(--coral)' : ''}">${esc(c.name)}${crew.id === c.id ? ' (you)' : ''}</b><span class="small muted">${c.size}👤</span><span class="f" style="width:48px;text-align:right">${c.points}</span></div>`).join('')}</div>
+
+    <div class="label">🔥 Campfire</div>
+    <div class="panel" id="feed"><div class="empty">Loading…</div></div>
+
+    <div class="label">💛 Friends (${fr.length})</div>
+    <div class="panel">${fr.length ? fr.map(f => { const p = player(f.id), lv = friendLevel(f.days); return `<div class="listrow"><div class="ava s">${esc(p.avatar)}</div><div class="grow"><b>${esc(p.display_name)}</b><div class="small muted">${lv[1]} · ${f.days} day${f.days > 1 ? 's' : ''} together</div></div><span class="hearts">${'♥'.repeat(lv[2])}${'♡'.repeat(4 - lv[2])}</span><button class="btn ghost sm" data-hi="${f.id}">🙌</button></div>`; }).join('')
+      : `<div class="empty">Link up with someone in person to add your first friend.</div>`}
+      <button class="btn coral" id="crewMeet" style="margin-top:8px">🤝 Link up with someone</button></div>`;
+  $('#bell').onclick = inboxSheet;
+  $('#crewMeet').onclick = meetSheet;
+  document.querySelectorAll('[data-hi]').forEach(b => b.onclick = () => hiFive(b.dataset.hi));
+  document.querySelectorAll('[data-h]').forEach(b => b.onclick = () => huntSheet(b.dataset.h));
+  fillPhotos($('#huntList'));
   if (!S.feed) {
-    const { data, error } = await sb.from('completions').select('id,player_id,partner_id,quest_title,tier,note,xp,created_at,card_id').eq('is_public', true).order('created_at', { ascending: false }).limit(40);
+    const { data, error } = await sb.from('activity').select('id,player_id,kind,title,path,xp,note,photo_path,partner_id,created_at').eq('is_public', true).order('created_at', { ascending: false }).limit(40);
     if (error) { $('#feed').innerHTML = `<div class="empty">${esc(errMsg(error))}</div>`; return; }
     S.feed = data || [];
   }
-  if (S.tab !== 'ward') return;
-  $('#feed').innerHTML = S.feed.length ? S.feed.map(c => {
-    const p = player(c.player_id) || { display_name: 'Someone', avatar: '🙂' }, pt = c.partner_id && player(c.partner_id);
-    const card = S.cards.find(k => k.id === c.card_id);
-    const mine = c.player_id === S.uid, done = S.cheered.has(c.id);
-    return `<div class="post"><div class="ava s">${esc(p.avatar)}</div><div class="body">
-      <div><b>${esc(p.display_name)}</b>${pt ? ` & <b>${esc(pt.display_name)}</b>` : ''} <span class="muted">completed</span> <b style="color:var(--t${c.tier})">${esc(c.quest_title)}</b></div>
-      ${c.note ? `<div class="note">“${esc(c.note)}”</div>` : ''}
-      <div class="row between small muted" style="margin-top:4px"><span>${ago(c.created_at)} · +${c.xp} XP${card ? ` · drew ${esc(card.emoji)}` : ''}</span>
-      ${mine ? '' : `<button class="cheer ${done ? 'done' : ''}" data-cheer="${c.id}" data-to="${c.player_id}">${done ? '❤️ Cheered' : '🤍 Cheer'}</button>`}</div></div></div>`;
-  }).join('') : '<div class="empty">The wall is empty. Complete a quest and share it!</div>';
+  if (S.tab !== 'crew' || !$('#feed')) return;
+  const icon = { quest: '📜', visit: '📍', meet: '🤝', hunt: '🔎', event: '📅', evolve: '🌱', recruit: '🎉', join: '👋' };
+  $('#feed').innerHTML = S.feed.length ? S.feed.map(a => {
+    const p = player(a.player_id), pt = a.partner_id && a.kind === 'quest' ? player(a.partner_id) : null, mine = a.player_id === S.uid, done = S.cheered.has(a.id);
+    return `<div class="post"><div class="row" style="align-items:flex-start"><div class="ava s">${esc(p.avatar)}</div><div class="grow">
+      <div><b>${esc(p.display_name)}</b>${pt ? ` & <b>${esc(pt.display_name)}</b>` : ''} <span class="muted">${a.kind === 'join' ? '' : icon[a.kind] || ''}</span> ${esc(a.title)}</div>
+      ${a.note ? `<div class="note">${esc(a.note)}</div>` : ''}
+      ${a.photo_path ? `<img class="photo" data-path="${esc(a.photo_path)}" alt="" loading="lazy">` : ''}
+      <div class="row between small muted" style="margin-top:6px"><span>${ago(a.created_at)}${a.xp ? ' · +' + a.xp + ' XP' : ''}</span>
+      ${mine ? '' : `<button class="cheer ${done ? 'done' : ''}" data-cheer="${a.id}" data-to="${a.player_id}">${done ? '❤️ Cheered' : '🤍 Cheer'}</button>`}</div></div></div></div>`;
+  }).join('') : '<div class="empty">Quiet so far. Be the spark!</div>';
+  fillPhotos($('#feed'));
   document.querySelectorAll('[data-cheer]').forEach(b => b.onclick = async () => {
     if (S.cheered.has(b.dataset.cheer)) return;
     S.cheered.add(b.dataset.cheer); b.classList.add('done'); b.textContent = '❤️ Cheered';
-    const { error } = await sb.from('kudos').insert({ from_id: S.uid, to_id: b.dataset.to, completion_id: b.dataset.cheer, message: 'cheered your quest ❤️' });
+    const { error } = await sb.from('kudos').insert({ from_id: S.uid, to_id: b.dataset.to, activity_id: b.dataset.cheer, message: 'cheered your post ❤️' });
     if (error) toast(errMsg(error));
   });
 }
 
-function encourage(id) {
-  const p = player(id); if (!p) return;
-  openSheet(`<div class="row"><div class="ava">${esc(p.avatar)}</div><h2>Encourage ${esc(p.display_name)}</h2></div>
-    <div class="label">Pick one</div><div class="row wrapf" id="encList">${ENCOURAGE.map((m, i) => `<button class="chip" data-m="${i}">${esc(m)}</button>`).join('')}</div>
-    <div class="label">…or write your own</div><input id="encTxt" maxlength="200" placeholder="Say something kind">
-    <div style="height:12px"></div><button class="btn" id="encGo">Send 💛</button>`);
-  $('#encList').onclick = e => { const b = e.target.closest('[data-m]'); if (b) $('#encTxt').value = ENCOURAGE[b.dataset.m]; };
-  $('#encGo').onclick = async () => {
-    const msg = $('#encTxt').value.trim(); if (!msg) return toast('Pick or write a message');
+function huntSheet(id) {
+  const x = S.home.hunt.find(i => i.id === id); if (!x) return;
+  if (x.found_by) {
+    openSheet(`<div class="center"><div style="font-size:46px">${esc(x.icon)}</div><h2>${esc(x.title)}</h2><p class="muted">Found by ${esc(player(x.found_by).display_name)} · ${ago(x.found_at)}</p></div>
+      ${x.note ? `<div class="panel" style="background:var(--paper);box-shadow:none">${esc(x.note)}</div>` : ''}
+      ${x.photo_path ? `<img data-path="${esc(x.photo_path)}" style="width:100%;border-radius:18px" alt="">` : ''}`);
+    return fillPhotos($('#sheetBody'));
+  }
+  openSheet(`<div class="center"><div style="font-size:46px">${esc(x.icon)}</div><h2 style="font-size:23px">${esc(x.title)}</h2><p class="muted" style="margin:4px 0 0">${esc(x.hint)}</p>
+    <div class="f" style="color:var(--coral);margin:8px 0 4px">+${x.points} crew points</div></div>
+    ${photoPicker('hPhoto')}<div style="height:8px"></div>
+    <textarea id="hNote" maxlength="280" placeholder="Tell your crew about it"></textarea><div style="height:12px"></div>
+    <button class="btn coral" id="hGo">Found it! 🔎</button>`);
+  bindPhoto('hPhoto');
+  $('#hGo').onclick = async () => {
+    const btn = $('#hGo'); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const f = $('#hPhoto').files[0], note = $('#hNote').value.trim();
+      if (!f && !note) throw new Error('Add a photo or a note so your crew can see it');
+      const photo = f ? await uploadPhoto(f) : null;
+      const { data, error } = await sb.rpc('hunt_find', { p_item: x.id, p_note: note, p_photo: photo });
+      if (error) throw error;
+      closeSheet(); confetti(24); toast(`+${data.points} for your crew!`);
+      S.feed = null; await refresh(); startCatch(data.encounter);
+    } catch (e) { toast(errMsg(e), 3500); btn.disabled = false; btn.textContent = 'Found it! 🔎'; }
+  };
+}
+
+function hiFive(id) {
+  const p = player(id);
+  openSheet(`<div class="row"><div class="ava l">${esc(p.avatar)}</div><h2 style="font-size:22px">Send ${esc(p.display_name)} a high five</h2></div>
+    <div class="label">Pick one</div><div class="row wrapf gap6" id="hfList">${HIFIVES.map((m, i) => `<button class="chip" data-m="${i}">${esc(m)}</button>`).join('')}</div>
+    <div class="label">…or write your own</div><input id="hfTxt" maxlength="200" placeholder="Say something kind">
+    <div style="height:12px"></div><button class="btn coral" id="hfGo">Send 🙌</button>`);
+  $('#hfList').onclick = e => { const b = e.target.closest('[data-m]'); if (b) $('#hfTxt').value = HIFIVES[b.dataset.m]; };
+  $('#hfGo').onclick = async () => {
+    const msg = $('#hfTxt').value.trim(); if (!msg) return toast('Pick or write a message');
     const { error } = await sb.from('kudos').insert({ from_id: S.uid, to_id: id, message: msg });
     if (error) return toast(errMsg(error));
-    closeSheet(); toast('Sent to ' + p.display_name + ' 💛');
+    closeSheet(); toast('Sent to ' + p.display_name + ' 🙌');
   };
 }
 
-async function openInbox() {
-  openSheet(`<h2 style="margin-bottom:10px">💌 Your encouragement</h2>${S.inbox.length ? S.inbox.map(k => {
-    const f = player(k.from_id) || { display_name: 'A teammate', avatar: '🙂' };
-    return `<div class="post"><div class="ava s">${esc(f.avatar)}</div><div class="body"><b>${esc(f.display_name)}</b> ${esc(k.message)}<div class="small muted">${ago(k.created_at)}${k.seen ? '' : ' · <b style="color:var(--t4)">new</b>'}</div></div></div>`;
-  }).join('') : '<div class="empty">Nothing yet — try sending some love first 💛</div>'}`);
+async function inboxSheet() {
+  openSheet(`<h2 style="font-size:24px;margin-bottom:8px">💌 Messages</h2>${S.inbox.length ? S.inbox.map(k => { const f = player(k.from_id);
+    return `<div class="listrow" style="align-items:flex-start;border-bottom:1px solid var(--line);padding:11px 0"><div class="ava s">${esc(f.avatar)}</div><div class="grow"><b>${esc(f.display_name)}</b> ${esc(k.message)}<div class="small muted">${ago(k.created_at)}${k.seen ? '' : ' · <b style="color:var(--coral)">new</b>'}</div></div><button class="btn ghost sm" data-hi="${k.from_id}">🙌</button></div>`; }).join('')
+    : '<div class="empty">Nothing yet — try sending a high five first!</div>'}`);
+  $('#sheetBody').querySelectorAll('[data-hi]').forEach(b => b.onclick = () => hiFive(b.dataset.hi));
   const ids = S.inbox.filter(k => !k.seen).map(k => k.id);
-  if (ids.length) { await sb.from('kudos').update({ seen: true }).in('id', ids); S.inbox.forEach(k => k.seen = true); if (S.tab === 'home') renderHome(); }
+  if (ids.length) { await sb.from('kudos').update({ seen: true }).in('id', ids); S.inbox.forEach(k => k.seen = true); navBadges(); if (S.tab === 'crew' && $('#bell')) $('#bell').innerHTML = '💌'; }
 }
 
-function renderCards() {
-  const own = new Map(S.myCards.map(c => [c.card_id, c.qty]));
-  const order = ['legendary', 'rare', 'uncommon', 'common'];
-  $('#app').innerHTML = `
-  <h1 style="font-size:28px;margin-bottom:4px">Card Collection</h1>
-  <p class="muted small" style="margin:0 0 10px">Every quest draws a card. Bigger social stretches draw rarer cards.</p>
-  <div class="panel"><div class="row between small"><b>${own.size} of ${S.cards.length} collected</b><span class="muted">${S.myCards.reduce((a, c) => a + c.qty, 0)} total draws</span></div>
-  <div class="bar" style="margin-top:8px"><i style="width:${Math.round(own.size / Math.max(1, S.cards.length) * 100)}%"></i></div></div>
-  ${order.map(r => `<div class="label" style="color:var(--${r})">${RAR[r]}</div><div class="grid">${S.cards.filter(c => c.rarity === r).map(c =>
-    own.has(c.id) ? `<button data-card="${c.id}" style="padding:0">${cardHTML(c, '', own.get(c.id))}</button>`
-      : `<div class="tcard locked"><div class="tc-name">???</div><div class="tc-art">❔</div><div class="tc-stats"><span>☀ ?</span><span>♥ ?</span></div></div>`).join('')}</div>`).join('')}`;
-  document.querySelectorAll('[data-card]').forEach(b => b.onclick = () => {
-    const c = S.cards.find(k => k.id == b.dataset.card);
-    openSheet(`${cardHTML(c, 'big')}<p class="center" style="font-weight:800;color:var(--${c.rarity})">${RAR[c.rarity].toUpperCase()} · ×${own.get(c.id)}</p><button class="btn ghost" onclick="closeSheet()">Close</button>`);
-  });
+/* ---------- lumidex ---------- */
+function growCost(s) { return s.stage === 1 ? 10 : 25; }
+function renderDex() {
+  const have = S.dex.length;
+  $('#pageBody').innerHTML = `
+    <div class="pagehead"><h1>Lumidex</h1><span class="f" style="color:var(--blue);font-size:18px">${have}/${S.species.length}</span></div>
+    <p class="muted small" style="margin:0 0 6px">Catch Lumins to earn ✦ sparks. Spend sparks to help them grow.</p>
+    <div class="bar blue" style="margin-bottom:16px"><i style="width:${Math.round(have / Math.max(1, S.species.length) * 100)}%"></i></div>
+    ${LINE_ORDER.map(line => {
+      const row = S.species.filter(s => s.line === line).sort((a, b) => a.stage - b.stage), c2 = LINES[line].c[1];
+      return `<div class="lineblock" style="--lc:${c2}"><div class="row between"><div><div class="virtue">${esc(LINES[line].virtue)}</div><div class="f" style="font-size:17px">${esc(row[0] ? row[0].name : '')} family</div></div><span class="sparkpill">✦ ${sparksFor(line)}</span></div>
+        <div class="dexrow">${row.map(s => { const q = owned(s.id), canGrow = q && s.stage < 3 && sparksFor(line) >= growCost(s);
+          return `<button class="mon ${q ? '' : 'sil'}" data-sp="${s.id}">${q > 1 ? `<span class="qty">×${q}</span>` : ''}<div class="art">${spSVG(s)}</div><div class="nm">${q ? esc(s.name) : '???'}</div>${canGrow ? '<span class="grow-btn">GROW ↑</span>' : ''}</button>`; }).join('')}</div></div>`;
+    }).join('')}`;
+  document.querySelectorAll('[data-sp]').forEach(b => b.onclick = () => monSheet(+b.dataset.sp));
 }
-
-function renderMe() {
-  const me = S.me, L = levelInfo(me.xp), bs = badges();
-  const invite = location.origin + location.pathname + '?ref=' + S.uid;
-  const anon = S.user && S.user.is_anonymous;
-  $('#app').innerHTML = `
-  <div class="hero"><div class="ava">${esc(me.avatar)}</div><div><h2>${esc(me.display_name)}</h2><div class="lv">LEVEL ${L.lv} · ${L.title.toUpperCase()} · ${me.xp} XP</div></div></div>
-  <div class="label">🏅 Badges (${bs.filter(b => b.on).length}/${bs.length})</div>
-  <div class="badges">${bs.map(b => `<div class="badge ${b.on ? '' : 'off'}" title="${esc(b.how)}"><div class="e">${b.e}</div><div class="n">${b.n}</div></div>`).join('')}</div>
-  <p class="small muted center">Tap-and-hold a faded badge to see how to earn it.</p>
-
-  <div class="label">🐑 Recruit a teammate · +60 XP & a legendary card</div>
-  <div class="panel"><div class="small muted" style="margin-bottom:10px">Share your personal link. When they join, you both win.</div>
-  <button class="btn" id="share">Share invite link</button></div>
-
-  <div class="label">Profile</div>
-  <div class="panel">
-    <input id="pName" maxlength="40" value="${esc(me.display_name)}">
-    <div style="height:10px"></div>
-    <div class="avpick" id="pAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === me.avatar ? 'on' : ''}">${a}</button>`).join('')}</div>
-    <div class="toggle"><div><b>Hide me from "Lights of the week"</b><div class="small muted">Your quests still count for the mission</div></div><button class="sw ${me.hide_from_board ? 'on' : ''}" id="pHide"></button></div>
-    <button class="btn ghost" id="pSave">Save profile</button>
-  </div>
-
-  ${anon ? `<div class="label">🔒 Protect your progress</div>
-  <div class="panel"><div class="small muted" style="margin-bottom:10px">Right now your progress lives on this phone only. Add an email so you can sign in anywhere.</div>
-  <input id="pEmail" type="email" placeholder="you@email.com"><div style="height:10px"></div><button class="btn ghost" id="pEmailGo">Save with email</button></div>`
-      : `<p class="small muted center">Signed in as ${esc(S.user && S.user.email)}</p>`}
-
-  ${me.is_leader ? leaderPanel() : `<div class="label">Leaders</div><div class="panel"><div class="row"><input id="lCode" placeholder="Leader code"><button class="btn ghost sm" id="lGo">Unlock</button></div></div>`}
-  `;
-  let av = me.avatar;
-  $('#pAv').onclick = e => { const b = e.target.closest('button'); if (!b) return; av = b.dataset.a; [...$('#pAv').children].forEach(x => x.classList.toggle('on', x === b)); };
-  $('#pHide').onclick = e => e.currentTarget.classList.toggle('on');
-  $('#pSave').onclick = async () => {
-    const { error } = await sb.from('players').update({ display_name: $('#pName').value.trim() || me.display_name, avatar: av, hide_from_board: $('#pHide').classList.contains('on') }).eq('id', S.uid);
+function monSheet(id) {
+  const s = species(id), q = owned(id), c2 = LINES[s.line].c[1], next = S.species.find(x => x.line === s.line && x.stage === s.stage + 1);
+  if (!q) { openSheet(`<div class="center"><div class="mon sil" style="width:160px;margin:0 auto;background:none"><div class="art">${spSVG(s)}</div></div><h2>???</h2><p class="muted">${s.stage === 1 ? 'Keep exploring — it\'s out there somewhere.' : 'Grow its earlier form to discover it, or get lucky and catch one in the wild.'}</p></div>`); return; }
+  const cost = growCost(s), sp = sparksFor(s.line);
+  openSheet(`<div class="center" style="--lc:${c2}"><div style="width:180px;height:180px;margin:-10px auto 0">${spSVG(s)}</div>
+    <div class="virtue">${esc(s.virtue)} · ${'★'.repeat(s.stage)}${'☆'.repeat(3 - s.stage)}</div><h2 style="font-size:28px">${esc(s.name)}</h2>
+    <p class="muted" style="font-style:italic">“${esc(s.flavor)}”</p>
+    <div class="row" style="justify-content:center;gap:8px"><span class="sparkpill">✦ ${sp} sparks</span><span class="sparkpill" style="background:var(--paper);color:var(--ink)">Caught ×${q}</span></div></div>
+    <div style="height:14px"></div>
+    ${next ? `<button class="btn ${sp >= cost ? '' : 'ghost'}" id="grow" ${sp >= cost ? '' : 'disabled'}>${sp >= cost ? `🌱 Grow into ${owned(next.id) ? esc(next.name) : '???'} (${cost} ✦)` : `Need ${cost - sp} more ✦ to grow`}</button>` : `<div class="center f" style="color:${c2}">Fully grown 🌟</div>`}`);
+  if ($('#grow')) $('#grow').onclick = async () => {
+    const { data, error } = await sb.rpc('evolve', { p_species: id });
     if (error) return toast(errMsg(error));
-    await loadAll(); toast('Saved ✓'); renderMe();
+    const nx = data.species;
+    openSheet(`<div class="center"><div style="width:200px;height:200px;margin:0 auto;animation:pop .7s">${spSVG(nx)}</div>${data.new ? '<div class="newtag">NEW!</div>' : ''}<h2 style="font-size:26px">${esc(s.name)} grew into ${esc(nx.name)}!</h2><p class="muted" style="font-style:italic">“${esc(nx.flavor)}”</p><button class="btn" onclick="closeSheet()">Amazing!</button></div>`);
+    confetti(50);
+    await refresh();
+  };
+}
+
+/* ---------- me ---------- */
+function streak() {
+  const weeks = new Set(S.acts.filter(a => a.kind !== 'join').map(a => weekStart(localDate(a.created_at))));
+  let w = S.home.week_start; if (!weeks.has(w)) w = shiftWeek(w, -1);
+  let n = 0; while (weeks.has(w)) { n++; w = shiftWeek(w, -1); } return n;
+}
+function badges() {
+  const a = S.acts, k = t => a.filter(x => x.kind === t), qp = p => a.filter(x => x.kind === 'quest' && x.path === p).length;
+  const spots = new Set(k('visit').map(x => x.ref_id)).size, fr = friends();
+  return [
+    { e: '👣', n: 'First Steps', on: a.some(x => x.kind !== 'join'), how: 'Do anything!' },
+    { e: '📍', n: 'Explorer', on: spots >= 5, how: 'Check in at 5 different spots' },
+    { e: '🗺️', n: 'Local Legend', on: k('visit').length >= 25, how: '25 check-ins' },
+    { e: '🤝', n: 'New Friend', on: fr.length >= 1, how: 'Link up with someone' },
+    { e: '🦋', n: 'Social Butterfly', on: fr.length >= 10, how: '10 different friends' },
+    { e: '💞', n: 'Good Friends', on: fr.some(f => f.days >= 7), how: 'Hang out with someone on 7 days' },
+    { e: '🔎', n: 'Hunter', on: k('hunt').length >= 5, how: '5 crew hunt finds' },
+    { e: '🤲', n: 'Helping Hand', on: qp('serve') >= 5, how: '5 Serve quests' },
+    { e: '🌙', n: 'Deep Thinker', on: qp('reflect') >= 10, how: '10 Reflect quests' },
+    { e: '📅', n: 'Showed Up', on: k('event').length >= 3, how: 'Check in at 3 happenings' },
+    { e: '🎉', n: 'Recruiter', on: k('recruit').length >= 1, how: 'Invite someone who joins' },
+    { e: '🔥', n: 'On a Roll', on: streak() >= 4, how: '4-week streak' },
+    { e: '📖', n: 'Collector', on: S.dex.length >= 12, how: '12 different Lumins' },
+    { e: '🌟', n: 'Fully Grown', on: S.dex.some(d => (species(d.species_id) || {}).stage === 3), how: 'Own a 3-star Lumin' },
+    { e: '🍽️', n: 'Supper Club', on: a.some(x => /supper club/i.test(x.title)), how: 'Dinner with a ward family' },
+    { e: '🛠️', n: 'JustServe', on: a.some(x => /justserve/i.test(x.title)), how: 'Do a JustServe project' }
+  ];
+}
+function renderMe() {
+  const me = S.me, L2 = levelInfo(me.xp), bs = badges();
+  const caught = S.dex.reduce((n, d) => n + d.qty, 0), spots = new Set(S.acts.filter(a => a.kind === 'visit').map(a => a.ref_id)).size;
+  $('#pageBody').innerHTML = `
+    <div class="row" style="margin-bottom:14px"><div class="ava l">${esc(me.avatar)}</div><div class="grow"><h1 style="font-size:26px">${esc(me.display_name)}</h1>
+      <div class="lvchip" style="font-size:13px">LEVEL ${L2.lv} · ${L2.title.toUpperCase()}</div>
+      <div class="bar blue" style="margin-top:5px"><i style="width:${L2.pct}%"></i></div><div class="tiny muted b" style="margin-top:3px">${L2.toNext} XP to level ${L2.lv + 1}</div></div></div>
+    <div class="statgrid"><div class="stat"><b>${streak()}🔥</b><span>wk streak</span></div><div class="stat"><b>${friends().length}</b><span>friends</span></div><div class="stat"><b>${caught}</b><span>caught</span></div><div class="stat"><b>${spots}</b><span>spots</span></div></div>
+
+    <div class="label">🏅 Badges ${bs.filter(b => b.on).length}/${bs.length}</div>
+    <div class="badges" id="bdg">${bs.map((b, i) => `<button class="badge ${b.on ? '' : 'off'}" data-b="${i}"><div class="e">${b.e}</div><div class="n">${b.n}</div></button>`).join('')}</div>
+
+    <div class="label">🎉 Invite a friend</div>
+    <div class="panel"><div class="small muted" style="margin-bottom:10px">Share your link. When they join, you both link up — and you get +60 XP and a rare-ish Lumin.</div>
+      <button class="btn coral" id="share">Share my invite link</button></div>
+
+    <div class="label">Profile</div>
+    <div class="panel"><input id="pName" maxlength="40" value="${esc(me.display_name)}"><div style="height:10px"></div>
+      <div class="avpick" id="pAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === me.avatar ? 'on' : ''}">${a}</button>`).join('')}</div>
+      <div class="toggle"><div><b>Ghost mode 👻</b><div class="small muted">Hide me from the weekly leaderboard</div></div><button class="sw ${me.ghost ? 'on' : ''}" id="pGhost"></button></div>
+      <button class="btn ghost" id="pSave">Save</button></div>
+
+    <div class="label">🔒 Signing in</div>
+    <div class="panel"><div class="row between"><div><div class="small muted b">USERNAME</div><div class="f" style="font-size:20px">@${esc(S.username || '')}</div></div><button class="btn ghost sm" id="pPin">Change PIN</button></div>
+      <div class="small muted" style="margin:10px 0">Sign in on any phone with your username + PIN. Getting a new phone? Use this to move over in one scan.</div>
+      <button class="btn gold" id="pMove">📲 Move to a new phone</button><div style="height:8px"></div>
+      <button class="btn ghost" id="pOut">Sign out of this phone</button></div>
+
+    ${me.is_leader ? leaderPanel() : `<div class="label">Leaders</div><div class="panel"><div class="row"><input id="lCode" placeholder="Leader code"><button class="btn ghost sm" id="lGo">Unlock</button></div></div>`}`;
+  $('#bdg').onclick = e => { const b = e.target.closest('[data-b]'); if (b) toast(`${bs[b.dataset.b].e} ${bs[b.dataset.b].n}: ${bs[b.dataset.b].how}`); };
+  let av = me.avatar;
+  $('#pAv').onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; av = b.dataset.a; [...$('#pAv').children].forEach(x => x.classList.toggle('on', x === b)); };
+  bindSw($('#pageBody'));
+  $('#pSave').onclick = async () => {
+    const { error } = await sb.from('players').update({ display_name: $('#pName').value.trim() || me.display_name, avatar: av, ghost: $('#pGhost').classList.contains('on') }).eq('id', S.uid);
+    if (error) return toast(errMsg(error));
+    toast('Saved ✓'); refresh();
   };
   $('#share').onclick = async () => {
-    const text = `Join me on Light the Ward — our YSA quest game! Ward code: ask me 😊`;
-    if (navigator.share) { try { await navigator.share({ title: 'Light the Ward', text, url: invite }); } catch (e) {} }
-    else { try { await navigator.clipboard.writeText(invite); toast('Invite link copied 📋'); } catch (e) { prompt('Copy your invite link:', invite); } }
+    const url = meetUrl(S.home.my_code), text = "Come play Lumins with me — it's like Pokémon Go for Sheboygan 🗺️✨";
+    if (navigator.share) { try { await navigator.share({ title: 'Lumins', text, url }); } catch (e) {} }
+    else { try { await navigator.clipboard.writeText(url); toast('Invite link copied 📋'); } catch (e) { prompt('Copy your invite link:', url); } }
   };
-  if (anon) $('#pEmailGo').onclick = async () => {
-    const email = $('#pEmail').value.trim(); if (!email) return;
-    const { error } = await sb.auth.updateUser({ email }, { emailRedirectTo: location.origin + location.pathname });
+  $('#pPin').onclick = () => {
+    openSheet(`<h2>Change your PIN</h2><p class="small muted">4–6 digits. You'll use it with @${esc(S.username || '')} to sign in.</p>
+      <input id="npin" maxlength="6" inputmode="numeric" pattern="[0-9]*" type="password" placeholder="New PIN" autocomplete="new-password"><div style="height:12px"></div><button class="btn" id="npGo">Save PIN</button>`);
+    $('#npGo').onclick = async () => {
+      const p = $('#npin').value.trim(); if (!PIN_RE.test(p)) return toast('PIN must be 4–6 digits');
+      const { error } = await sb.rpc('set_pin', { p_pin: p });
+      if (error) return toast(errMsg(error));
+      closeSheet(); toast('PIN updated 🔒');
+    };
+  };
+  $('#pMove').onclick = async () => {
+    const { data: code, error } = await sb.rpc('make_transfer_code');
     if (error) return toast(errMsg(error));
-    toast('Check your email to confirm 📬', 4000);
+    openSheet(`<div class="center"><h2 style="font-size:24px">Move to a new phone 📲</h2>
+      <p class="small muted" style="margin:4px 0 14px">Scan this with the new phone's camera. Or on the new phone, tap "I've played before" and enter the code. Works once, for 15 minutes.</p></div>
+      <div class="qrbox" id="tqr"></div><div class="code" style="margin-top:12px;font-size:28px">${code.slice(0, 4)}-${code.slice(4)}</div>
+      <p class="tiny muted center b" style="margin-top:10px">Only show this to yourself — anyone who scans it gets into your account.</p>`);
+    try { new QRCode($('#tqr'), { text: signinUrl(code), width: 200, height: 200, colorDark: '#1C2340', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $('#tqr').textContent = signinUrl(code); }
+  };
+  $('#pOut').onclick = () => {
+    openSheet(`<h2>Sign out of this phone?</h2><p class="muted">Your Lumins are safe. Sign back in anytime with <b>@${esc(S.username || '')}</b> and your PIN.</p>
+      <button class="btn coral" id="soGo">Sign out</button><div style="height:8px"></div><button class="btn ghost" onclick="closeSheet()">Cancel</button>`);
+    $('#soGo').onclick = async () => { await sb.rpc('forget_device'); await sb.auth.signOut(); location.reload(); };
   };
   if (!me.is_leader) $('#lGo').onclick = async () => {
     const { error } = await sb.rpc('claim_leader', { p_code: $('#lCode').value });
     if (error) return toast(errMsg(error));
-    await loadAll(); toast('Leader tools unlocked ★'); renderMe();
+    toast('Leader tools unlocked ★'); refresh();
   };
   else bindLeader();
 }
 
 /* ---------- leader tools ---------- */
 function leaderPanel() {
-  const m = S.home.mission;
-  return `<div class="label" style="color:var(--gold)">★ Leader tools</div>
-  <div class="panel"><h3 style="margin-bottom:8px">This week's mission</h3>
-    <input id="mTitle" value="${esc(m.title)}" placeholder="Mission title"><div style="height:8px"></div>
-    <textarea id="mDesc" placeholder="What are we doing together?">${esc(m.description)}</textarea><div style="height:8px"></div>
-    <div class="row"><input id="mGoal" type="number" min="1" value="${m.goal}" style="width:110px"><input id="mReward" value="${esc(m.reward)}" placeholder="Reward (e.g. pizza night)"></div>
-    <div style="height:10px"></div><button class="btn" id="mSave">Update mission</button></div>
-  <div class="panel"><h3 style="margin-bottom:8px">Add a quest</h3>
-    <div class="row"><input id="nIcon" value="⭐" style="width:64px;text-align:center"><input id="nTitle" placeholder="Quest title"></div><div style="height:8px"></div>
-    <textarea id="nDesc" placeholder="Description"></textarea><div style="height:8px"></div>
-    <div class="row"><select id="nTier">${[1, 2, 3, 4].map(t => `<option value="${t}">${TIERS[t].emoji} ${TIERS[t].name}</option>`).join('')}</select>
-    <input id="nXp" type="number" min="5" value="25" style="width:90px"></div><div style="height:8px"></div>
-    <select id="nCool"><option value="1">Daily</option><option value="3">Every 3 days</option><option value="7" selected>Weekly</option><option value="14">Every 2 weeks</option><option value="0">Unlimited</option></select>
-    <div style="height:10px"></div><button class="btn" id="nGo">Add quest</button></div>
-  <div class="panel"><h3 style="margin-bottom:8px">Quest list</h3>${S.quests.map(q => `<div class="toggle" style="padding:6px 0"><span class="small">${esc(q.icon)} ${esc(q.title)} <span class="muted">· ${q.xp}xp</span></span><button class="sw ${q.is_active ? 'on' : ''}" data-act="${q.id}"></button></div>`).join('')}</div>
-  <div class="panel"><h3 style="margin-bottom:8px">Ward codes</h3><div id="codes" class="small muted">Loading…</div></div>`;
-}
+  const b = S.home.beacon || {};
+  return `<div class="label" style="color:var(--coral)">★ Leader tools</div>
+  <div class="panel"><h3 style="margin-bottom:8px">🔥 This week's beacon</h3>
+    <input id="bTitle" value="${esc(b.title || '')}" placeholder="Title"><div style="height:8px"></div>
+    <div class="row"><input id="bGoal" type="number" min="1" value="${b.goal || 40}" style="width:100px"><input id="bReward" value="${esc(b.reward || '')}" placeholder="Reward"></div>
+    <div style="height:10px"></div><button class="btn" id="bSave">Update beacon</button></div>
 
+  <div class="panel"><h3 style="margin-bottom:8px">📅 New happening</h3>
+    <input id="eTitle" placeholder="FHE game night, JustServe, ward dinner…"><div style="height:8px"></div>
+    <input id="ePlace" placeholder="Where"><div style="height:8px"></div>
+    <div class="row"><input id="eWhen" type="datetime-local"><input id="eXp" type="number" value="50" min="5" style="width:86px"></div><div style="height:8px"></div>
+    <textarea id="eDesc" placeholder="Details (optional)"></textarea><div style="height:10px"></div>
+    <button class="btn" id="eGo">Add happening</button>
+    <p class="small muted">A 4-letter check-in code is created automatically — find it under 📅 on the map.</p></div>
+
+  <div class="panel"><h3 style="margin-bottom:8px">🔎 This week's hunt</h3>
+    ${S.home.hunt.map(x => `<div class="listrow"><span>${esc(x.icon)}</span><span class="grow small">${esc(x.title)} <span class="muted">· ${x.points}</span></span><button class="btn ghost sm" data-delh="${x.id}">✕</button></div>`).join('')}
+    <div class="row" style="margin-top:8px"><input id="hIcon" value="🔎" style="width:60px;text-align:center"><input id="hTitle" placeholder="New hunt item"></div><div style="height:8px"></div>
+    <div class="row"><input id="hHint" placeholder="Hint"><input id="hPts" type="number" value="15" min="5" style="width:80px"></div><div style="height:10px"></div>
+    <button class="btn" id="hAdd">Add to hunt</button></div>
+
+  <div class="panel"><h3 style="margin-bottom:8px">📜 Add a quest</h3>
+    <div class="row"><input id="nIcon" value="⭐" style="width:60px;text-align:center"><input id="nTitle" placeholder="Quest title"></div><div style="height:8px"></div>
+    <textarea id="nDesc" placeholder="Description"></textarea><div style="height:8px"></div>
+    <div class="row"><select id="nPath">${Object.entries(PATHS).map(([k, v]) => `<option value="${k}">${v.emoji} ${v.name}</option>`).join('')}</select>
+      <select id="nEnergy">${[1, 2, 3].map(e => `<option value="${e}">${ENERGY[e]}</option>`).join('')}</select></div><div style="height:8px"></div>
+    <div class="row"><input id="nXp" type="number" value="25" min="5" style="width:90px"><select id="nCool"><option value="1">Daily</option><option value="3">Every 3 days</option><option value="7" selected>Weekly</option><option value="14">Every 2 weeks</option><option value="0">Unlimited</option></select></div>
+    <div style="height:10px"></div><button class="btn" id="nGo">Add quest</button>
+    <div class="label" style="margin-top:16px">All quests</div>
+    ${S.quests.map(q => `<div class="toggle" style="padding:5px 0"><span class="small">${esc(q.icon)} ${esc(q.title)}</span><button class="sw ${q.is_active ? 'on' : ''}" data-act="${q.id}"></button></div>`).join('')}</div>
+
+  <div class="panel"><h3 style="margin-bottom:4px">📍 Spots</h3><p class="small muted" style="margin:0 0 8px">Add spots with ➕ on the map (great for the church building, the institute, a favorite café).</p>
+    ${S.spots.map(s => `<div class="toggle" style="padding:5px 0"><span class="small">${esc(s.icon)} ${esc(s.name)}</span><button class="sw ${s.is_active ? 'on' : ''}" data-spot="${s.id}"></button></div>`).join('')}</div>
+
+  <div class="panel"><h3 style="margin-bottom:4px">🔑 Help someone sign back in</h3><p class="small muted" style="margin:0 0 8px">Forgot their PIN? Make them a one-time sign-in code (good for 48 hours). They can set a new PIN after.</p>
+    <div class="row"><select id="rcWho">${S.players.filter(p => p.id !== S.uid).map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</option>`).join('')}</select><button class="btn sm" id="rcGo">Make code</button></div>
+    <div id="rcOut"></div></div>
+
+  <div class="panel"><h3 style="margin-bottom:8px">⚙️ Game settings</h3><div id="sets" class="small muted">Loading…</div></div>`;
+}
 async function bindLeader() {
-  $('#mSave').onclick = async () => {
-    const { error } = await sb.from('missions').update({ title: $('#mTitle').value.trim(), description: $('#mDesc').value.trim(), goal: Math.max(1, +$('#mGoal').value || 1), reward: $('#mReward').value.trim() }).eq('id', S.home.mission.id);
+  const sw = (sel, table) => document.querySelectorAll(sel).forEach(b => b.onclick = async () => {
+    const on = !b.classList.contains('on'); b.classList.toggle('on', on);
+    const id = b.dataset.act || b.dataset.spot;
+    const { error } = await sb.from(table).update({ is_active: on }).eq('id', id);
+    if (error) { b.classList.toggle('on', !on); return toast(errMsg(error)); }
+    const arr = table === 'quests' ? S.quests : S.spots; const x = arr.find(i => i.id === id); if (x) x.is_active = on; drawSpots();
+  });
+  sw('[data-act]', 'quests'); sw('[data-spot]', 'spots');
+  $('#rcGo').onclick = async () => {
+    const id = $('#rcWho').value; if (!id) return;
+    const { data: code, error } = await sb.rpc('leader_signin_code', { p_player: id });
     if (error) return toast(errMsg(error));
-    await loadAll(); toast('Mission updated ⚔️');
+    const nm = player(id).display_name, url = signinUrl(code);
+    $('#rcOut').innerHTML = `<div class="panel" style="background:#FFF5D6;box-shadow:none;margin:10px 0 0"><div class="small b">Code for ${esc(nm)}:</div><div class="code" style="font-size:26px">${code.slice(0, 4)}-${code.slice(4)}</div>
+      <button class="btn sm" id="rcShare">Text them the link</button></div>`;
+    $('#rcShare').onclick = async () => { const text = `Here's your Lumins sign-in link (works once): ${url}`; if (navigator.share) { try { await navigator.share({ text }); } catch (e) {} } else { try { await navigator.clipboard.writeText(text); toast('Copied 📋'); } catch (e) { prompt('Copy:', text); } } };
+  };
+  $('#bSave').onclick = async () => {
+    const { error } = await sb.from('beacons').update({ title: $('#bTitle').value.trim() || 'Light the Beacon', goal: Math.max(1, +$('#bGoal').value || 1), reward: $('#bReward').value.trim() }).eq('id', S.home.beacon.id);
+    if (error) return toast(errMsg(error)); toast('Beacon updated 🔥'); refresh();
+  };
+  $('#eGo').onclick = async () => {
+    const title = $('#eTitle').value.trim(), w = $('#eWhen').value;
+    if (!title || !w) return toast('Add a title and a time');
+    const { error } = await sb.from('events').insert({ title, place: $('#ePlace').value.trim(), starts_at: new Date(w).toISOString(), xp: Math.max(5, +$('#eXp').value || 50), description: $('#eDesc').value.trim() });
+    if (error) return toast(errMsg(error)); toast('Happening added 📅'); refresh();
+  };
+  document.querySelectorAll('[data-delh]').forEach(b => b.onclick = async () => {
+    const { error } = await sb.from('hunt_items').delete().eq('id', b.dataset.delh);
+    if (error) return toast(errMsg(error)); refresh();
+  });
+  $('#hAdd').onclick = async () => {
+    const title = $('#hTitle').value.trim(); if (!title) return toast('Add a title');
+    const { error } = await sb.from('hunt_items').insert({ week_start: S.home.week_start, title, hint: $('#hHint').value.trim(), icon: $('#hIcon').value.trim() || '🔎', points: Math.max(5, +$('#hPts').value || 15) });
+    if (error) return toast(errMsg(error)); toast('Added to the hunt 🔎'); refresh();
   };
   $('#nGo').onclick = async () => {
     const title = $('#nTitle').value.trim(); if (!title) return toast('Add a title');
-    const { error } = await sb.from('quests').insert({ title, description: $('#nDesc').value.trim(), icon: $('#nIcon').value.trim() || '⭐', tier: +$('#nTier').value, xp: Math.max(5, +$('#nXp').value || 25), cooldown_days: +$('#nCool').value });
-    if (error) return toast(errMsg(error));
-    await loadAll(); toast('Quest added 🗺️'); renderMe();
+    const { error } = await sb.from('quests').insert({ title, description: $('#nDesc').value.trim(), icon: $('#nIcon').value.trim() || '⭐', path: $('#nPath').value, energy: +$('#nEnergy').value, xp: Math.max(5, +$('#nXp').value || 25), cooldown_days: +$('#nCool').value });
+    if (error) return toast(errMsg(error)); toast('Quest added 📜'); refresh();
   };
-  document.querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
-    const on = !b.classList.contains('on'); b.classList.toggle('on', on);
-    const { error } = await sb.from('quests').update({ is_active: on }).eq('id', b.dataset.act);
-    if (error) { b.classList.toggle('on', !on); return toast(errMsg(error)); }
-    const q = S.quests.find(x => x.id === b.dataset.act); if (q) q.is_active = on;
-  });
   const { data } = await sb.from('settings').select('*').eq('id', 1).maybeSingle();
-  if (!data || !$('#codes')) return;
-  $('#codes').innerHTML = `<input id="sWard" value="${esc(data.ward_name)}"><div style="height:8px"></div>
-    <div class="row"><input id="sJoin" value="${esc(data.join_code)}" placeholder="Join code"><input id="sLead" value="${esc(data.leader_code)}" placeholder="Leader code"></div>
-    <div style="height:10px"></div><button class="btn ghost" id="sSave">Save codes</button>`;
+  if (!data || !$('#sets')) return;
+  $('#sets').innerHTML = `<input id="sWard" value="${esc(data.ward_name)}"><div style="height:8px"></div>
+    <div class="row"><input id="sJoin" value="${esc(data.join_code)}" placeholder="Game code"><input id="sLead" value="${esc(data.leader_code)}" placeholder="Leader code"></div><div style="height:8px"></div>
+    <div class="row"><span class="small b" style="white-space:nowrap">Check-in radius (m)</span><input id="sRad" type="number" min="25" value="${data.checkin_radius_m}"></div>
+    <div style="height:10px"></div><button class="btn ghost" id="sSave">Save settings</button>`;
   $('#sSave').onclick = async () => {
-    const { error } = await sb.from('settings').update({ ward_name: $('#sWard').value.trim(), join_code: $('#sJoin').value.trim(), leader_code: $('#sLead').value.trim() }).eq('id', 1);
-    if (error) return toast(errMsg(error));
-    await loadAll(); toast('Saved ✓');
+    const { error } = await sb.from('settings').update({ ward_name: $('#sWard').value.trim(), join_code: $('#sJoin').value.trim(), leader_code: $('#sLead').value.trim(), checkin_radius_m: Math.max(25, +$('#sRad').value || 200) }).eq('id', 1);
+    if (error) return toast(errMsg(error)); toast('Saved ✓'); refresh();
   };
 }
 
