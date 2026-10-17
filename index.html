@@ -63,6 +63,9 @@ textarea{resize:vertical;min-height:72px}
 .pin{position:relative;width:46px;height:46px;border-radius:50% 50% 50% 6px;transform:rotate(-45deg);background:#fff;border:4px solid var(--kc,var(--blue));box-shadow:0 6px 14px rgba(28,35,64,.25);display:grid;place-items:center}
 .pin span{transform:rotate(45deg);font-size:21px}
 .pin.done{opacity:.55;filter:saturate(.4)}
+.pin.away{border-style:dashed;width:38px;height:38px}
+.pin.away span{font-size:17px}
+.wardtag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.04em;color:var(--violet);background:#F0EBFF;border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}
 .pin.done:after{content:"✓";position:absolute;transform:rotate(45deg);right:-6px;top:-6px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center}
 .pin:not(.done){animation:bob 2.6s ease-in-out infinite}
 @keyframes bob{50%{transform:rotate(-45deg) translate(2px,-2px)}}
@@ -285,7 +288,7 @@ const QUALITY = ['Nice!', 'Great!', 'Excellent!'];
 
 const S = {
   tab: 'map', uid: null, user: null, me: null, home: null, players: [], quests: [], spots: [], species: [], dex: [], sparks: [],
-  acts: [], meets: [], inbox: [], pending: [], events: [], feed: null, cheered: new Set(),
+  acts: [], meets: [], inbox: [], pending: [], events: [], wards: [], feed: null, feedScope: 'ward', cheered: new Set(),
   battery: lsGet('battery') || 'mid', qpath: 'all', map: null, layer: null, meMarker: null, pos: null, addSpot: false
 };
 
@@ -307,6 +310,9 @@ function when(ts) { return new Date(ts).toLocaleString([], { weekday: 'short', m
 function levelInfo(xp) { const lv = Math.floor(Math.sqrt(xp / 60)) + 1; const cur = 60 * (lv - 1) ** 2, next = 60 * lv ** 2; return { lv, title: TITLES[Math.min(lv - 1, TITLES.length - 1)], pct: Math.round((xp - cur) / (next - cur) * 100), toNext: next - xp }; }
 function player(id) { return S.players.find(p => p.id === id) || { display_name: 'Someone', avatar: '🙂' }; }
 function species(id) { return S.species.find(s => s.id === id); }
+function myWard() { return S.me && S.me.ward_id; }
+function wardName(id) { const w = S.wards.find(x => x.id === id); return w ? w.name : ''; }
+function otherWard(p) { return p && p.ward_id && p.ward_id !== myWard(); }
 function owned(id) { const d = S.dex.find(x => x.species_id === id); return d ? d.qty : 0; }
 function sparksFor(line) { const s = S.sparks.find(x => x.line === line); return s ? s.qty : 0; }
 function friendLevel(days) { return FRIEND_LV.find(f => days >= f[0]) || FRIEND_LV[3]; }
@@ -445,16 +451,18 @@ async function loadAll() {
     sb.from('dex').select('species_id,qty').eq('player_id', uid),
     sb.from('sparks').select('line,qty').eq('player_id', uid),
     sb.from('activity').select('id,kind,ref_id,title,path,xp,partner_id,created_at').eq('player_id', uid).order('created_at', { ascending: false }).limit(1000),
-    sb.from('players').select('id,display_name,avatar,is_leader,ghost,xp,created_at').order('display_name'),
+    sb.from('players').select('id,display_name,avatar,is_leader,is_admin,ghost,xp,created_at,ward_id').order('display_name'),
     sb.from('meets').select('a,b,met_on'),
     sb.from('kudos').select('*').eq('to_id', uid).order('created_at', { ascending: false }).limit(50),
     sb.from('encounters').select('id,species_id,source,created_at').eq('player_id', uid).eq('caught', false).order('created_at'),
-    sb.from('events').select('id,title,description,place,starts_at,xp').gte('starts_at', new Date(Date.now() - 12 * 3600e3).toISOString()).order('starts_at').limit(30)
+    sb.from('wards').select('id,name,center_lat,center_lng'),
+    sb.from('events').select('id,title,description,place,starts_at,xp,ward_id,stake_wide').gte('starts_at', new Date(Date.now() - 12 * 3600e3).toISOString()).order('starts_at').limit(30)
   ]);
   const err = res.find(r => r.error); if (err) toast(errMsg(err.error));
-  [S.home, S.quests, S.spots, S.species, S.dex, S.sparks, S.acts, S.players, S.meets, S.inbox, S.pending, S.events] = res.map(r => r.data || []);
+  [S.home, S.quests, S.spots, S.species, S.dex, S.sparks, S.acts, S.players, S.meets, S.inbox, S.pending, S.wards, S.events] = res.map(r => r.data || []);
   if (Array.isArray(S.home)) S.home = null;
-  S.me = S.players.find(p => p.id === uid) || S.me;
+  S.me = Object.assign({}, S.me, S.players.find(p => p.id === uid) || {});
+  S.events = S.events.filter(e => e.ward_id === S.me.ward_id || e.stake_wide);
 }
 
 async function refresh() {
@@ -496,7 +504,7 @@ function renderJoin(mode) {
         <div class="tiny muted b" style="margin-top:5px">PIN is 4–6 digits. Screenshot it or save it in your passwords — no email needed.</div>
         <div class="label">Avatar</div>
         <div class="avpick" id="jAv">${AVATARS.map(a => `<button data-a="${a}" class="${a === av ? 'on' : ''}">${a}</button>`).join('')}</div>
-        <div class="label">Game code or a friend's code</div>
+        <div class="label">Your ward's game code or a friend's code</div>
         <input id="jCode" value="${esc(invite)}" placeholder="Ask whoever invited you" autocapitalize="characters" style="text-transform:uppercase;font-weight:800;letter-spacing:.08em">
         <div style="height:16px"></div>
         <button class="btn" id="jGo">Let's go!</button>`
@@ -530,10 +538,10 @@ function renderJoin(mode) {
       if (!PIN_RE.test(pin)) return toast('PIN must be 4–6 digits');
       if (!code) return toast('Add the game code or a friend\'s code');
       enter($('#jGo'), "Let's go!", async () => {
-        const { error } = await sb.rpc('join_ward', { p_code: code, p_name: name, p_username: user, p_pin: pin, p_avatar: av, p_starter: starter, p_inviter: invite || null });
+        const { data, error } = await sb.rpc('join_ward', { p_code: code, p_name: name, p_username: user, p_pin: pin, p_avatar: av, p_starter: starter, p_inviter: invite || null });
         if (error) throw error;
         lsSet('meet', ''); confetti();
-        setTimeout(() => toast(`Welcome, ${name}! Tap a pin on the map to explore 🗺️`, 4000), 600);
+        setTimeout(() => toast(`Welcome to ${data.ward || 'the game'}, ${name}! Tap a pin to explore 🗺️`, 4000), 600);
       });
     };
   } else {
@@ -596,7 +604,8 @@ function drawSpots() {
   const visited = new Set((S.home && S.home.visited) || []);
   S.spots.filter(s => s.is_active).forEach(s => {
     const k = KINDS[s.kind] || KINDS.gather;
-    const icon = L.divIcon({ className: '', html: `<div class="pin ${visited.has(s.id) ? 'done' : ''}" style="--kc:${k.c}"><span>${esc(s.icon)}</span></div>`, iconSize: [46, 46], iconAnchor: [4, 46] });
+    const away = s.ward_id && s.ward_id !== myWard();
+    const icon = L.divIcon({ className: '', html: `<div class="pin ${visited.has(s.id) ? 'done' : ''} ${away ? 'away' : ''}" style="--kc:${k.c}"><span>${esc(s.icon)}</span></div>`, iconSize: away ? [38, 38] : [46, 46], iconAnchor: away ? [3, 38] : [4, 46] });
     L.marker([s.lat, s.lng], { icon }).addTo(S.layer).on('click', () => spotSheet(s));
   });
 }
@@ -650,16 +659,17 @@ function spotSheet(s) {
   const k = KINDS[s.kind] || KINDS.gather;
   const done = ((S.home && S.home.visited) || []).includes(s.id);
   const ever = S.acts.some(a => a.kind === 'visit' && a.ref_id === s.id);
-  const d = S.pos ? distM(S.pos, s) : null;
+  const d = S.pos ? distM(S.pos, s) : null, away = s.ward_id && s.ward_id !== myWard();
+  const base = (ever ? 15 : 40) + (away ? 10 : 0);
   openSheet(`
     <div class="row"><div style="width:60px;height:60px;border-radius:18px;background:${k.c}22;display:grid;place-items:center;font-size:32px">${esc(s.icon)}</div>
-      <div class="grow"><div class="tiny b" style="color:${k.c};letter-spacing:.08em">${k.n.toUpperCase()}</div><h2 style="font-size:23px">${esc(s.name)}</h2>
+      <div class="grow"><div class="tiny b" style="color:${k.c};letter-spacing:.08em">${k.n.toUpperCase()}${away ? ` · <span style="color:var(--violet)">${esc(wardName(s.ward_id)).toUpperCase()}</span>` : ''}</div><h2 style="font-size:23px">${esc(s.name)}</h2>
       <div class="small muted">${d != null ? fmtDist(d) + ' away' : 'Location off'}${ever ? '' : ' · <b style="color:var(--coral)">New spot! +25 bonus</b>'}</div></div></div>
     <p class="muted">${esc(s.description)}</p>
-    <div class="panel" style="background:var(--paper);box-shadow:none;padding:12px"><div class="small"><b>Check in here</b> for +${ever ? 15 : 40} XP and a Lumin. ${s.kind === 'lake' ? 'Water-type Lumins love the lakeshore.' : s.kind === 'quiet' ? 'Quiet spots attract rare, peaceful Lumins.' : s.kind === 'park' ? 'Leafy and feathery Lumins hang out in parks.' : 'Busy places attract friendly Lumins.'}</div></div>
+    <div class="panel" style="background:var(--paper);box-shadow:none;padding:12px"><div class="small"><b>Check in here</b> for +${base} XP and a Lumin.${away ? ' <b style="color:var(--violet)">🧳 Traveler bonus — this spot belongs to another ward!</b>' : ''} ${s.kind === 'lake' ? 'Water-type Lumins love the lakeshore.' : s.kind === 'quiet' ? 'Quiet spots attract rare, peaceful Lumins.' : s.kind === 'park' ? 'Leafy and feathery Lumins hang out in parks.' : 'Busy places attract friendly Lumins.'}</div></div>
     ${done ? `<div class="btn ghost center">✓ Checked in today — back tomorrow</div>` : `<button class="btn" id="ciGo">📍 I'm here — check in</button>`}
     <a class="btn ghost" style="margin-top:10px;text-decoration:none;text-align:center" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}">Directions</a>
-    ${S.me.is_leader ? `<button class="btn ghost sm" style="margin-top:12px" id="spHide">Hide this spot</button>` : ''}`);
+    ${(S.me.is_leader && !away) || S.me.is_admin ? `<button class="btn ghost sm" style="margin-top:12px" id="spHide">Hide this spot</button>` : ''}`);
   if ($('#ciGo')) $('#ciGo').onclick = async () => {
     const btn = $('#ciGo'); btn.disabled = true; btn.textContent = 'Finding you…';
     try {
@@ -667,7 +677,7 @@ function spotSheet(s) {
       const { data, error } = await sb.rpc('visit_spot', { p_spot: s.id, p_lat: p.lat, p_lng: p.lng });
       if (error) throw error;
       closeSheet();
-      toast(`+${data.xp} XP${data.first ? ' · First visit bonus!' : ''}`);
+      toast(`+${data.xp} XP${data.first ? ' · First visit bonus!' : ''}${data.traveler ? ' · 🧳 Traveler!' : ''}`);
       await refresh();
       startCatch(data.encounter);
     } catch (e) { toast(errMsg(e), 3800); btn.disabled = false; btn.textContent = "📍 I'm here — check in"; }
@@ -701,6 +711,7 @@ function beaconSheet() {
     <div class="row between small" style="margin-top:6px"><b>${h.light} / ${b.goal}</b><span class="muted">${h.heroes} player${h.heroes === 1 ? '' : 's'} helping</span></div>
     ${b.reward ? `<div class="panel" style="background:#FFF5D6;box-shadow:none;margin-top:14px"><b>🎁 Reward:</b> ${esc(b.reward)}</div>` : ''}
     ${h.light >= b.goal ? `<div class="center f" style="font-size:20px;color:var(--green);margin-top:10px">🎉 The beacon is lit!</div>` : ''}
+    ${h.wards_playing > 1 || S.wards.length > 1 ? `<div class="panel" style="background:#F0EBFF;box-shadow:none;margin-top:12px"><div class="row between"><b>🌎 All wards together</b><span class="f" style="color:var(--violet);font-size:18px">${h.stake_light} lights</span></div><div class="small muted">${h.wards_playing || 1} ward${h.wards_playing === 1 ? '' : 's'} adding light this week</div></div>` : ''}
     <div class="label">Brightest this week</div>
     ${(h.board || []).length ? h.board.map((p, i) => `<div class="listrow"><span class="rank">${i + 1}</span><div class="ava s">${esc(p.avatar)}</div><b class="grow">${esc(p.display_name)}</b><span class="f" style="color:var(--blue)">${p.wxp} XP</span></div>`).join('') : '<div class="empty">Nobody yet — be first!</div>'}`);
 }
@@ -714,7 +725,7 @@ function meetSheet() {
     <div class="code" style="margin-top:12px">${esc(code)}</div>
     <div class="label">Or type their code</div>
     <div class="row"><input id="mCode" maxlength="5" placeholder="ABCDE" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.15em;font-weight:800"><button class="btn sm" id="mGo">Link</button></div>
-    <p class="small muted center" style="margin-top:12px">New friend: +40 XP · Hanging out again on another day: +15 XP & friendship grows</p>`);
+    <p class="small muted center" style="margin-top:12px">New friend: +40 XP · From another ward: +20 more 🌉 · Hanging out again on another day: +15 XP & friendship grows</p>`);
   try { new QRCode($('#qr'), { text: meetUrl(code), width: 200, height: 200, colorDark: '#1C2340', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $('#qr').textContent = meetUrl(code); }
   $('#mGo').onclick = () => { const c = $('#mCode').value.trim().toUpperCase(); if (c.length !== 5) return toast('Codes are 5 characters'); doMeet(c); };
 }
@@ -722,7 +733,7 @@ async function doMeet(code) {
   const { data, error } = await sb.rpc('meet', { p_code: code });
   if (error) return toast(errMsg(error), 3500);
   closeSheet(); confetti(24);
-  toast(data.new ? `New friend: ${data.name}! +${data.xp} XP` : `Day ${data.days} with ${data.name}! +${data.xp} XP`, 3500);
+  toast(data.new ? `New friend: ${data.name}${data.bridge ? ' from ' + data.ward + ' 🌉' : ''}! +${data.xp} XP` : `Day ${data.days} with ${data.name}! +${data.xp} XP`, 3800);
   await refresh();
   startCatch(data.encounter);
 }
@@ -741,7 +752,7 @@ async function eventsSheet() {
     <p class="small muted" style="margin:4px 0 10px">At an activity? Ask the host for the check-in code — it's worth a rare-ish Lumin.</p>
     <div class="row"><input id="evCode" maxlength="4" placeholder="CODE" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.2em;font-weight:800"><button class="btn sm coral" id="evGo">Check in</button></div>
     <div class="label">Coming up</div>
-    ${S.events.length ? S.events.map(e => `<div class="panel" style="background:var(--paper);box-shadow:none;margin-bottom:8px"><div class="row between"><b>${esc(e.title)}</b><span class="small f" style="color:var(--blue)">+${e.xp}</span></div>
+    ${S.events.length ? S.events.map(e => `<div class="panel" style="background:var(--paper);box-shadow:none;margin-bottom:8px"><div class="row between"><b>${esc(e.title)}${e.stake_wide ? '<span class="wardtag">ALL WARDS</span>' : ''}</b><span class="small f" style="color:var(--blue)">+${e.xp}</span></div>
       <div class="small muted">${when(e.starts_at)}${e.place ? ' · ' + esc(e.place) : ''}</div>${e.description ? `<div class="small" style="margin-top:4px">${esc(e.description)}</div>` : ''}
       ${codes[e.id] ? `<div class="small b" style="margin-top:6px">Code to read aloud: <span class="f" style="color:var(--coral);letter-spacing:.15em">${esc(codes[e.id])}</span></div>` : ''}</div>`).join('') : '<div class="empty">Nothing scheduled yet.</div>'}`);
   $('#evGo').onclick = async () => {
@@ -881,7 +892,8 @@ function renderQuests() {
 function openQuest(id) {
   const q = S.quests.find(x => x.id === id); if (!q) return;
   const st = questStatus(q), d = isDaily(q), xp = q.xp + (d ? Math.floor(q.xp / 2) : 0);
-  const mates = S.players.filter(p => p.id !== S.uid);
+  const frIds = new Set(friends().map(f => f.id));
+  const mates = S.players.filter(p => p.id !== S.uid && (p.ward_id === myWard() || frIds.has(p.id)));
   const crew = new Set((S.home.crew && S.home.crew.members) || []);
   mates.sort((a, b) => crew.has(b.id) - crew.has(a.id));
   openSheet(`
@@ -894,7 +906,7 @@ function openQuest(id) {
       <textarea id="qNote" maxlength="280" placeholder="${q.path === 'reflect' ? 'A thought, a feeling, a question…' : 'How did it go?'}"></textarea>
       <div style="height:8px"></div>${photoPicker('qPhoto')}
       ${q.energy > 1 && mates.length ? `<div class="label">Did it with someone? They get half XP</div>
-        <select id="qPartner"><option value="">— Just me —</option>${mates.map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}${crew.has(p.id) ? ' (crew)' : ''}</option>`).join('')}</select>` : ''}
+        <select id="qPartner"><option value="">— Just me —</option>${mates.map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}${crew.has(p.id) ? ' (crew)' : otherWard(p) ? ' · ' + esc(wardName(p.ward_id)) : ''}</option>`).join('')}</select>` : ''}
       <div class="toggle"><div><b>Post to the Campfire</b><div class="small muted">Off = private, still counts</div></div><button class="sw ${q.path === 'reflect' ? '' : 'on'}" id="qPub"></button></div>
       <button class="btn" id="qGo">Done! ✨</button>`
       : `<div class="panel center" style="background:var(--paper);box-shadow:none">✓ Done — it comes back in <b>${st.left} day${st.left > 1 ? 's' : ''}</b>.</div>`}`);
@@ -927,7 +939,7 @@ async function renderCrew() {
   const found = h.hunt.filter(x => x.found_by).length, myPts = h.hunt.filter(x => x.found_by).reduce((a, x) => a + x.points, 0);
   const unseen = S.inbox.filter(k => !k.seen).length, fr = friends();
   $('#pageBody').innerHTML = `
-    <div class="pagehead"><h1>Crew</h1><button class="bell" id="bell">💌${unseen ? `<em>${unseen}</em>` : ''}</button></div>
+    <div class="pagehead"><div><h1>Crew</h1><div class="small b" style="color:var(--violet)">${esc(h.ward_name || "")}</div></div><button class="bell" id="bell">💌${unseen ? `<em>${unseen}</em>` : ''}</button></div>
     <p class="muted small" style="margin:0 0 14px">New random crews every Sunday — a chance to get to know someone new.</p>
     <div class="crewcard" data-emoji="${esc(crew.emoji)}">
       <div class="small b" style="opacity:.9">THIS WEEK YOU'RE IN</div><h2>${esc(crew.emoji)} ${esc(crew.name)}</h2>
@@ -946,20 +958,24 @@ async function renderCrew() {
     <div class="label">🏆 Crew standings</div>
     <div class="panel">${h.standings.map((c, i) => `<div class="listrow"><span class="rank">${i + 1}</span><span style="font-size:22px">${esc(c.emoji)}</span><b class="grow" style="${crew.id === c.id ? 'color:var(--coral)' : ''}">${esc(c.name)}${crew.id === c.id ? ' (you)' : ''}</b><span class="small muted">${c.size}👤</span><span class="f" style="width:48px;text-align:right">${c.points}</span></div>`).join('')}</div>
 
-    <div class="label">🔥 Campfire</div>
+    <div class="row between" style="margin:22px 2px 9px"><div class="label" style="margin:0">🔥 Campfire</div>
+      <div class="row gap6" id="feedScope"><button class="chip ${S.feedScope === 'ward' ? 'on' : ''}" data-fs="ward">My ward</button><button class="chip ${S.feedScope === 'all' ? 'on' : ''}" data-fs="all">Everyone 🌎</button></div></div>
     <div class="panel" id="feed"><div class="empty">Loading…</div></div>
 
     <div class="label">💛 Friends (${fr.length})</div>
-    <div class="panel">${fr.length ? fr.map(f => { const p = player(f.id), lv = friendLevel(f.days); return `<div class="listrow"><div class="ava s">${esc(p.avatar)}</div><div class="grow"><b>${esc(p.display_name)}</b><div class="small muted">${lv[1]} · ${f.days} day${f.days > 1 ? 's' : ''} together</div></div><span class="hearts">${'♥'.repeat(lv[2])}${'♡'.repeat(4 - lv[2])}</span><button class="btn ghost sm" data-hi="${f.id}">🙌</button></div>`; }).join('')
+    <div class="panel">${fr.length ? fr.map(f => { const p = player(f.id), lv = friendLevel(f.days); return `<div class="listrow"><div class="ava s">${esc(p.avatar)}</div><div class="grow"><b>${esc(p.display_name)}</b>${otherWard(p) ? `<span class="wardtag">${esc(wardName(p.ward_id))}</span>` : ''}<div class="small muted">${lv[1]} · ${f.days} day${f.days > 1 ? 's' : ''} together</div></div><span class="hearts">${'♥'.repeat(lv[2])}${'♡'.repeat(4 - lv[2])}</span><button class="btn ghost sm" data-hi="${f.id}">🙌</button></div>`; }).join('')
       : `<div class="empty">Link up with someone in person to add your first friend.</div>`}
       <button class="btn coral" id="crewMeet" style="margin-top:8px">🤝 Link up with someone</button></div>`;
   $('#bell').onclick = inboxSheet;
   $('#crewMeet').onclick = meetSheet;
+  $('#feedScope').onclick = e => { const b = e.target.closest('[data-fs]'); if (!b || b.dataset.fs === S.feedScope) return; S.feedScope = b.dataset.fs; S.feed = null; renderCrew(); };
   document.querySelectorAll('[data-hi]').forEach(b => b.onclick = () => hiFive(b.dataset.hi));
   document.querySelectorAll('[data-h]').forEach(b => b.onclick = () => huntSheet(b.dataset.h));
   fillPhotos($('#huntList'));
   if (!S.feed) {
-    const { data, error } = await sb.from('activity').select('id,player_id,kind,title,path,xp,note,photo_path,partner_id,created_at').eq('is_public', true).order('created_at', { ascending: false }).limit(40);
+    let q = sb.from('activity').select('id,player_id,ward_id,kind,title,path,xp,note,photo_path,partner_id,created_at').eq('is_public', true);
+    if (S.feedScope === 'ward') q = q.eq('ward_id', myWard());
+    const { data, error } = await q.order('created_at', { ascending: false }).limit(40);
     if (error) { $('#feed').innerHTML = `<div class="empty">${esc(errMsg(error))}</div>`; return; }
     S.feed = data || [];
   }
@@ -968,7 +984,7 @@ async function renderCrew() {
   $('#feed').innerHTML = S.feed.length ? S.feed.map(a => {
     const p = player(a.player_id), pt = a.partner_id && a.kind === 'quest' ? player(a.partner_id) : null, mine = a.player_id === S.uid, done = S.cheered.has(a.id);
     return `<div class="post"><div class="row" style="align-items:flex-start"><div class="ava s">${esc(p.avatar)}</div><div class="grow">
-      <div><b>${esc(p.display_name)}</b>${pt ? ` & <b>${esc(pt.display_name)}</b>` : ''} <span class="muted">${a.kind === 'join' ? '' : icon[a.kind] || ''}</span> ${esc(a.title)}</div>
+      <div><b>${esc(p.display_name)}</b>${a.ward_id && a.ward_id !== myWard() ? `<span class="wardtag">${esc(wardName(a.ward_id))}</span>` : ''}${pt ? ` & <b>${esc(pt.display_name)}</b>` : ''} <span class="muted">${a.kind === 'join' ? '' : icon[a.kind] || ''}</span> ${esc(a.title)}</div>
       ${a.note ? `<div class="note">${esc(a.note)}</div>` : ''}
       ${a.photo_path ? `<img class="photo" data-path="${esc(a.photo_path)}" alt="" loading="lazy">` : ''}
       <div class="row between small muted" style="margin-top:6px"><span>${ago(a.created_at)}${a.xp ? ' · +' + a.xp + ' XP' : ''}</span>
@@ -1096,7 +1112,9 @@ function badges() {
     { e: '📖', n: 'Collector', on: S.dex.length >= 12, how: '12 different Lumins' },
     { e: '🌟', n: 'Fully Grown', on: S.dex.some(d => (species(d.species_id) || {}).stage === 3), how: 'Own a 3-star Lumin' },
     { e: '🍽️', n: 'Supper Club', on: a.some(x => /supper club/i.test(x.title)), how: 'Dinner with a ward family' },
-    { e: '🛠️', n: 'JustServe', on: a.some(x => /justserve/i.test(x.title)), how: 'Do a JustServe project' }
+    { e: '🛠️', n: 'JustServe', on: a.some(x => /justserve/i.test(x.title)), how: 'Do a JustServe project' },
+    { e: '🌉', n: 'Bridge Builder', on: fr.some(f => otherWard(player(f.id))), how: 'Make a friend from another ward' },
+    { e: '🧳', n: 'Traveler', on: k('visit').some(x => { const sp = S.spots.find(z => z.id === x.ref_id); return sp && sp.ward_id !== myWard(); }), how: "Check in at another ward's spot" }
   ];
 }
 function renderMe() {
@@ -1104,7 +1122,7 @@ function renderMe() {
   const caught = S.dex.reduce((n, d) => n + d.qty, 0), spots = new Set(S.acts.filter(a => a.kind === 'visit').map(a => a.ref_id)).size;
   $('#pageBody').innerHTML = `
     <div class="row" style="margin-bottom:14px"><div class="ava l">${esc(me.avatar)}</div><div class="grow"><h1 style="font-size:26px">${esc(me.display_name)}</h1>
-      <div class="lvchip" style="font-size:13px">LEVEL ${L2.lv} · ${L2.title.toUpperCase()}</div>
+      <div class="lvchip" style="font-size:13px">LEVEL ${L2.lv} · ${L2.title.toUpperCase()}</div><div class="small b" style="color:var(--violet)">${esc(wardName(me.ward_id) || S.home.ward_name)}${me.is_admin ? ' · ★ admin' : me.is_leader ? ' · ★ leader' : ''}</div>
       <div class="bar blue" style="margin-top:5px"><i style="width:${L2.pct}%"></i></div><div class="tiny muted b" style="margin-top:3px">${L2.toNext} XP to level ${L2.lv + 1}</div></div></div>
     <div class="statgrid"><div class="stat"><b>${streak()}🔥</b><span>wk streak</span></div><div class="stat"><b>${friends().length}</b><span>friends</span></div><div class="stat"><b>${caught}</b><span>caught</span></div><div class="stat"><b>${spots}</b><span>spots</span></div></div>
 
@@ -1127,6 +1145,10 @@ function renderMe() {
       <button class="btn gold" id="pMove">📲 Move to a new phone</button><div style="height:8px"></div>
       <button class="btn ghost" id="pOut">Sign out of this phone</button></div>
 
+    <div class="label">🏠 Your ward</div>
+    <div class="panel"><div class="small muted" style="margin-bottom:8px">Moved, or joined the wrong ward? Enter the new ward's game code. Your Lumins, friends and XP come with you.</div>
+      <div class="row"><input id="swCode" placeholder="New ward's game code" autocapitalize="characters" style="text-transform:uppercase;font-weight:800"><button class="btn ghost sm" id="swGo">Switch</button></div></div>
+
     ${me.is_leader ? leaderPanel() : `<div class="label">Leaders</div><div class="panel"><div class="row"><input id="lCode" placeholder="Leader code"><button class="btn ghost sm" id="lGo">Unlock</button></div></div>`}`;
   $('#bdg').onclick = e => { const b = e.target.closest('[data-b]'); if (b) toast(`${bs[b.dataset.b].e} ${bs[b.dataset.b].n}: ${bs[b.dataset.b].how}`); };
   let av = me.avatar;
@@ -1138,7 +1160,7 @@ function renderMe() {
     toast('Saved ✓'); refresh();
   };
   $('#share').onclick = async () => {
-    const url = meetUrl(S.home.my_code), text = "Come play Lumins with me — it's like Pokémon Go for Sheboygan 🗺️✨";
+    const url = meetUrl(S.home.my_code), text = "Come play Lumins with me — it's like Pokémon Go for our YSAs 🗺️✨";
     if (navigator.share) { try { await navigator.share({ title: 'Lumins', text, url }); } catch (e) {} }
     else { try { await navigator.clipboard.writeText(url); toast('Invite link copied 📋'); } catch (e) { prompt('Copy your invite link:', url); } }
   };
@@ -1160,6 +1182,14 @@ function renderMe() {
       <div class="qrbox" id="tqr"></div><div class="code" style="margin-top:12px;font-size:28px">${code.slice(0, 4)}-${code.slice(4)}</div>
       <p class="tiny muted center b" style="margin-top:10px">Only show this to yourself — anyone who scans it gets into your account.</p>`);
     try { new QRCode($('#tqr'), { text: signinUrl(code), width: 200, height: 200, colorDark: '#1C2340', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $('#tqr').textContent = signinUrl(code); }
+  };
+  $('#swGo').onclick = async () => {
+    const c = $('#swCode').value.trim(); if (!c) return toast("Enter the new ward's game code");
+    const { data, error } = await sb.rpc('switch_ward', { p_code: c });
+    if (error) return toast(errMsg(error));
+    toast(`Welcome to ${data.ward}! 🏠`, 3500); S.feed = null;
+    const { data: who } = await sb.rpc('whoami'); if (who) S.me = who;
+    await refresh(); if (S.map && S.home) S.map.setView(S.home.center, 14);
   };
   $('#pOut').onclick = () => {
     openSheet(`<h2>Sign out of this phone?</h2><p class="muted">Your Lumins are safe. Sign back in anytime with <b>@${esc(S.username || '')}</b> and your PIN.</p>
@@ -1187,7 +1217,8 @@ function leaderPanel() {
     <input id="eTitle" placeholder="FHE game night, JustServe, ward dinner…"><div style="height:8px"></div>
     <input id="ePlace" placeholder="Where"><div style="height:8px"></div>
     <div class="row"><input id="eWhen" type="datetime-local"><input id="eXp" type="number" value="50" min="5" style="width:86px"></div><div style="height:8px"></div>
-    <textarea id="eDesc" placeholder="Details (optional)"></textarea><div style="height:10px"></div>
+    <textarea id="eDesc" placeholder="Details (optional)"></textarea>
+    <div class="toggle"><div><b>Stake-wide 🌎</b><div class="small muted">Every ward sees it (dances, devotionals, conferences)</div></div><button class="sw" id="eStake"></button></div>
     <button class="btn" id="eGo">Add happening</button>
     <p class="small muted">A 4-letter check-in code is created automatically — find it under 📅 on the map.</p></div>
 
@@ -1204,17 +1235,24 @@ function leaderPanel() {
       <select id="nEnergy">${[1, 2, 3].map(e => `<option value="${e}">${ENERGY[e]}</option>`).join('')}</select></div><div style="height:8px"></div>
     <div class="row"><input id="nXp" type="number" value="25" min="5" style="width:90px"><select id="nCool"><option value="1">Daily</option><option value="3">Every 3 days</option><option value="7" selected>Weekly</option><option value="14">Every 2 weeks</option><option value="0">Unlimited</option></select></div>
     <div style="height:10px"></div><button class="btn" id="nGo">Add quest</button>
-    <div class="label" style="margin-top:16px">All quests</div>
-    ${S.quests.map(q => `<div class="toggle" style="padding:5px 0"><span class="small">${esc(q.icon)} ${esc(q.title)}</span><button class="sw ${q.is_active ? 'on' : ''}" data-act="${q.id}"></button></div>`).join('')}</div>
+    <div class="label" style="margin-top:16px">${S.me.is_admin ? 'All quests (shared ones affect every ward)' : 'Your ward\'s quests'}</div>
+    ${S.quests.filter(q => S.me.is_admin || q.ward_id === myWard()).map(q => `<div class="toggle" style="padding:5px 0"><span class="small">${esc(q.icon)} ${esc(q.title)}${q.ward_id ? '' : ' <span class="muted">· shared</span>'}</span><button class="sw ${q.is_active ? 'on' : ''}" data-act="${q.id}"></button></div>`).join('') || '<div class="small muted">None yet — quests you add show up here. Everyone also gets the shared quest library.</div>'}</div>
 
   <div class="panel"><h3 style="margin-bottom:4px">📍 Spots</h3><p class="small muted" style="margin:0 0 8px">Add spots with ➕ on the map (great for the church building, the institute, a favorite café).</p>
-    ${S.spots.map(s => `<div class="toggle" style="padding:5px 0"><span class="small">${esc(s.icon)} ${esc(s.name)}</span><button class="sw ${s.is_active ? 'on' : ''}" data-spot="${s.id}"></button></div>`).join('')}</div>
+    ${S.spots.filter(s => s.ward_id === myWard()).map(s => `<div class="toggle" style="padding:5px 0"><span class="small">${esc(s.icon)} ${esc(s.name)}</span><button class="sw ${s.is_active ? 'on' : ''}" data-spot="${s.id}"></button></div>`).join('')}</div>
 
   <div class="panel"><h3 style="margin-bottom:4px">🔑 Help someone sign back in</h3><p class="small muted" style="margin:0 0 8px">Forgot their PIN? Make them a one-time sign-in code (good for 48 hours). They can set a new PIN after.</p>
-    <div class="row"><select id="rcWho">${S.players.filter(p => p.id !== S.uid).map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</option>`).join('')}</select><button class="btn sm" id="rcGo">Make code</button></div>
+    <div class="row"><select id="rcWho">${S.players.filter(p => p.id !== S.uid && (S.me.is_admin || p.ward_id === myWard())).map(p => `<option value="${p.id}">${esc(p.avatar)} ${esc(p.display_name)}</option>`).join('')}</select><button class="btn sm" id="rcGo">Make code</button></div>
     <div id="rcOut"></div></div>
 
-  <div class="panel"><h3 style="margin-bottom:8px">⚙️ Game settings</h3><div id="sets" class="small muted">Loading…</div></div>`;
+  <div class="panel"><h3 style="margin-bottom:8px">⚙️ Ward settings</h3><div id="sets" class="small muted">Loading…</div></div>
+  ${S.me.is_admin ? `<div class="label" style="color:var(--violet)">★ Admin · all wards</div>
+  <div class="panel" id="adminWards"><div class="small muted">Loading…</div></div>
+  <div class="panel"><h3 style="margin-bottom:4px">➕ Add a ward</h3><p class="small muted" style="margin:0 0 8px">Pan the map to the new ward's town first, then tap "Use map center." Their leaders add their own spots after.</p>
+    <input id="awName" placeholder="Ward name (e.g. West Bend YSA)"><div style="height:8px"></div>
+    <div class="row"><input id="awJoin" placeholder="Game code" autocapitalize="characters" style="text-transform:uppercase"><input id="awLead" placeholder="Leader code"></div><div style="height:8px"></div>
+    <div class="row"><input id="awLat" placeholder="Latitude" inputmode="decimal"><input id="awLng" placeholder="Longitude" inputmode="decimal"><button class="btn ghost sm" id="awCenter">Use map center</button></div><div style="height:10px"></div>
+    <button class="btn" id="awGo">Create ward</button></div>` : ''}`;
 }
 async function bindLeader() {
   const sw = (sel, table) => document.querySelectorAll(sel).forEach(b => b.onclick = async () => {
@@ -1225,6 +1263,7 @@ async function bindLeader() {
     const arr = table === 'quests' ? S.quests : S.spots; const x = arr.find(i => i.id === id); if (x) x.is_active = on; drawSpots();
   });
   sw('[data-act]', 'quests'); sw('[data-spot]', 'spots');
+  $('#eStake').onclick = e => e.currentTarget.classList.toggle('on');
   $('#rcGo').onclick = async () => {
     const id = $('#rcWho').value; if (!id) return;
     const { data: code, error } = await sb.rpc('leader_signin_code', { p_player: id });
@@ -1241,7 +1280,7 @@ async function bindLeader() {
   $('#eGo').onclick = async () => {
     const title = $('#eTitle').value.trim(), w = $('#eWhen').value;
     if (!title || !w) return toast('Add a title and a time');
-    const { error } = await sb.from('events').insert({ title, place: $('#ePlace').value.trim(), starts_at: new Date(w).toISOString(), xp: Math.max(5, +$('#eXp').value || 50), description: $('#eDesc').value.trim() });
+    const { error } = await sb.from('events').insert({ title, place: $('#ePlace').value.trim(), starts_at: new Date(w).toISOString(), xp: Math.max(5, +$('#eXp').value || 50), description: $('#eDesc').value.trim(), stake_wide: $('#eStake').classList.contains('on') });
     if (error) return toast(errMsg(error)); toast('Happening added 📅'); refresh();
   };
   document.querySelectorAll('[data-delh]').forEach(b => b.onclick = async () => {
@@ -1258,15 +1297,35 @@ async function bindLeader() {
     const { error } = await sb.from('quests').insert({ title, description: $('#nDesc').value.trim(), icon: $('#nIcon').value.trim() || '⭐', path: $('#nPath').value, energy: +$('#nEnergy').value, xp: Math.max(5, +$('#nXp').value || 25), cooldown_days: +$('#nCool').value });
     if (error) return toast(errMsg(error)); toast('Quest added 📜'); refresh();
   };
-  const { data } = await sb.from('settings').select('*').eq('id', 1).maybeSingle();
-  if (!data || !$('#sets')) return;
-  $('#sets').innerHTML = `<input id="sWard" value="${esc(data.ward_name)}"><div style="height:8px"></div>
-    <div class="row"><input id="sJoin" value="${esc(data.join_code)}" placeholder="Game code"><input id="sLead" value="${esc(data.leader_code)}" placeholder="Leader code"></div><div style="height:8px"></div>
-    <div class="row"><span class="small b" style="white-space:nowrap">Check-in radius (m)</span><input id="sRad" type="number" min="25" value="${data.checkin_radius_m}"></div>
-    <div style="height:10px"></div><button class="btn ghost" id="sSave">Save settings</button>`;
-  $('#sSave').onclick = async () => {
-    const { error } = await sb.from('settings').update({ ward_name: $('#sWard').value.trim(), join_code: $('#sJoin').value.trim(), leader_code: $('#sLead').value.trim(), checkin_radius_m: Math.max(25, +$('#sRad').value || 200) }).eq('id', 1);
-    if (error) return toast(errMsg(error)); toast('Saved ✓'); refresh();
+  const { data } = await sb.rpc('ward_settings');
+  if (data && $('#sets')) {
+    $('#sets').innerHTML = `<input id="sWard" value="${esc(data.name)}" placeholder="Ward name"><div style="height:8px"></div>
+      <div class="row"><input id="sJoin" value="${esc(data.join_code)}" placeholder="Game code"><input id="sLead" value="${esc(data.leader_code)}" placeholder="Leader code"></div><div style="height:8px"></div>
+      <div class="row"><span class="small b" style="white-space:nowrap">Check-in radius (m)</span><input id="sRad" type="number" min="25" max="2000" value="${data.checkin_radius_m}"></div>
+      <div class="toggle"><div><b>Move map center here</b><div class="small muted">Sets your ward's home map to where the map is now</div></div><button class="sw" id="sCenter"></button></div>
+      <button class="btn ghost" id="sSave">Save ward settings</button>`;
+    bindSw($('#sets'));
+    $('#sSave').onclick = async () => {
+      const c = $('#sCenter').classList.contains('on') && S.map ? S.map.getCenter() : null;
+      const { error } = await sb.rpc('update_ward', { p_name: $('#sWard').value.trim(), p_join: $('#sJoin').value.trim(), p_leader: $('#sLead').value.trim(), p_radius: Math.max(25, +$('#sRad').value || 200), p_lat: c ? c.lat : null, p_lng: c ? c.lng : null });
+      if (error) return toast(errMsg(error)); toast('Saved ✓'); refresh();
+    };
+  }
+  if (!S.me.is_admin || !$('#adminWards')) return;
+  const drawWards = async () => {
+    const { data: ws } = await sb.rpc('admin_wards');
+    $('#adminWards').innerHTML = `<h3 style="margin-bottom:6px">🌎 Wards</h3>` + (ws || []).map(w => `<div class="listrow" style="border-bottom:1px solid var(--line)"><div class="grow"><b>${esc(w.name)}</b>${w.id === myWard() ? ' <span class="wardtag">YOURS</span>' : ''}<div class="small muted">Game code <b>${esc(w.join_code)}</b> · Leader code <b>${esc(w.leader_code)}</b></div></div><span class="small b">${w.players}👤</span></div>`).join('');
+  };
+  drawWards();
+  $('#awCenter').onclick = () => { if (!S.map) return; const c = S.map.getCenter(); $('#awLat').value = c.lat.toFixed(5); $('#awLng').value = c.lng.toFixed(5); };
+  $('#awGo').onclick = async () => {
+    const name = $('#awName').value.trim(), join = $('#awJoin').value.trim(), lead = $('#awLead').value.trim(), lat = parseFloat($('#awLat').value), lng = parseFloat($('#awLng').value);
+    if (!name || join.length < 4 || lead.length < 4) return toast('Add a name, a game code and a leader code (4+ characters)');
+    if (!isFinite(lat) || !isFinite(lng)) return toast('Add the map center (tap "Use map center")');
+    const { error } = await sb.rpc('admin_create_ward', { p_name: name, p_join: join, p_leader: lead, p_lat: lat, p_lng: lng });
+    if (error) return toast(errMsg(error));
+    toast(`${name} created 🎉 Share the game code with them`, 4000);
+    ['#awName', '#awJoin', '#awLead', '#awLat', '#awLng'].forEach(x => $(x).value = ''); drawWards(); refresh();
   };
 }
 
